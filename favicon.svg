@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="orbitGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="40%" stop-color="#22d3ee" />
+      <stop offset="70%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+  </defs>
+
+  <g fill="none" stroke="url(#orbitGrad)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- OUTER ORBITAL RING -->
+    <circle cx="256" cy="256" r="236" stroke-width="15" />
+    <!-- OUTER PLANETS -->
+    <circle cx="95" cy="100" r="21" fill="#05070B" stroke-width="15" />
+    <circle cx="417" cy="417" r="28" fill="#05070B" stroke-width="15" />
+
+    <!-- MIDDLE ORBITAL RING -->
+    <circle cx="256" cy="256" r="185" stroke-width="15" />
+    <!-- MIDDLE PLANETS -->
+    <circle cx="441" cy="256" r="22" fill="#05070B" stroke-width="15" />
+    <circle cx="96" cy="336" r="24" fill="#05070B" stroke-width="15" />
+
+    <!-- INNER ORBITAL RING -->
+    <circle cx="256" cy="256" r="132" stroke-width="15" />
+    <!-- INNER PLANETS -->
+    <circle cx="256" cy="124" r="20" fill="#05070B" stroke-width="15" />
+    <circle cx="256" cy="388" r="20" fill="#05070B" stroke-width="15" />
+
+    <!-- CENTRAL SUN CORE -->
+    <circle cx="256" cy="256" r="54" stroke-width="15" />
+
+    <!-- SUN RAYS (12 SOLAR CORONA TICKS) -->
+    <!-- 0 deg (Top) -->
+    <line x1="256" y1="184" x2="256" y2="194" stroke-width="12" />
+    <!-- 30 deg -->
+    <line x1="292" y1="193" x2="287" y2="202" stroke-width="12" />
+    <!-- 60 deg -->
+    <line x1="319" y1="219" x2="310" y2="224" stroke-width="12" />
+    <!-- 90 deg (Right) -->
+    <line x1="328" y1="256" x2="318" y2="256" stroke-width="12" />
+    <!-- 120 deg -->
+    <line x1="319" y1="293" x2="310" y2="288" stroke-width="12" />
+    <!-- 150 deg -->
+    <line x1="292" y1="319" x2="287" y2="310" stroke-width="12" />
+    <!-- 180 deg (Bottom) -->
+    <line x1="256" y1="328" x2="256" y2="318" stroke-width="12" />
+    <!-- 210 deg -->
+    <line x1="220" y1="319" x2="225" y2="310" stroke-width="12" />
+    <!-- 240 deg -->
+    <line x1="193" y1="293" x2="202" y2="288" stroke-width="12" />
+    <!-- 270 deg (Left) -->
+    <line x1="184" y1="256" x2="194" y2="256" stroke-width="12" />
+    <!-- 300 deg -->
+    <line x1="193" y1="219" x2="202" y2="224" stroke-width="12" />
+    <!-- 330 deg -->
+    <line x1="220" y1="193" x2="225" y2="202" stroke-width="12" />
+  </g>
+</svg>

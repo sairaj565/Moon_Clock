@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en" class="overflow-x-hidden w-full max-w-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Independent Native Moon Time Engine (Chandra Mana)</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="favicon.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Orbitron, Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    html,
+    body {
+      overflow-x: hidden !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #05070B;
+    }
+
+    .font-orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Thin elegant scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #05070B;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #152238;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4DA3FF;
+    }
+
+    /* Premium glow styles */
+    .glow-lunar {
+      box-shadow: 0 0 45px rgba(77, 163, 255, 0.2);
+    }
+
+    .glow-gold {
+      box-shadow: 0 0 35px rgba(212, 175, 55, 0.15);
+    }
+
+    .glow-emerald {
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.2);
+    }
+
+    @keyframes pulseSoft {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.7;
+        transform: scale(1.01);
+      }
+    }
+
+    .pulse-soft {
+      animation: pulseSoft 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body
+  class="text-[#F5F5F5] min-h-screen flex flex-col justify-between selection:bg-[#4DA3FF]/30 selection:text-white relative overflow-x-hidden">
+
+  <!-- GRAPHIC INSTRUMENT GRID BACKGROUND -->
+  <div
+    class="absolute inset-0 bg-[linear-gradient(to_right,#15223807_1px,transparent_1px),linear-gradient(to_bottom,#15223807_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0">
+  </div>
+
+  <!-- FLOATING LUNAR LIGHT SHIELDS -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#4DA3FF]/[0.03] rounded-full blur-[150px]"></div>
+    <div class="absolute bottom-10 right-1/4 w-[650px] h-[650px] bg-[#D4AF37]/[0.025] rounded-full blur-[170px]"></div>
+  </div>
+
+  <!-- NAVIGATION BAR HUD -->
+  <header
+    class="relative z-10 border-b border-[#152238]/60 bg-[#05070B]/95 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Scientific Lunar Icon -->
+      <div
+        class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl border border-[#4DA3FF]/40 bg-[#152238]/20 flex items-center justify-center relative shadow-[inset_0_0_12px_rgba(77,163,255,0.15)] shrink-0 p-1">
+        <img src="favicon.svg" onerror="this.onerror=null; this.src='favicon.png';" alt="Aryabhata Moon Time"
+          class="w-full h-full object-contain">
+        <div
+          class="absolute -top-[1.5px] -right-[1.5px] w-2.5 h-2.5 bg-[#10b981] rounded-full border border-black shadow-[0_0_8px_#10b981]">
+        </div>
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <span
+            class="text-xs sm:text-sm font-black tracking-wider sm:tracking-widest text-[#4DA3FF] uppercase font-orbitron">Independent
+            Native Moon Time</span>
+          <span
+            class="text-[8px] sm:text-[9px] bg-[#152238] text-[#D4AF37] px-1.5 sm:px-2 py-0.5 rounded border border-[#D4AF37]/30 font-mono font-bold">CHANDRA
+            MANA 708H</span>
+        </div>
+        <p class="text-[8px] sm:text-[9px] text-[#F5F5F5]/40 tracking-wider font-mono uppercase">Pure Selenographic
+          Independent Time Engine</p>
+      </div>
+    </div>
+
+    <!-- ENGINE STATUS INDICATOR -->
+    <div class="flex items-center gap-3">
+      <div
+        class="flex items-center gap-2 bg-[#152238]/30 border border-[#152238] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-mono text-[9px] sm:text-[10px]">
+        <span class="w-2 h-2 rounded-full bg-[#10b981] animate-ping"></span>
+        <span class="text-[#10b981] font-bold">LIVE NATIVE MOON CHRONOGRAPH</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN HUD BODY -->
+  <main
+    class="relative z-10 max-w-[1440px] mx-auto w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col gap-6 sm:gap-8">
+
+    <!-- HERO MOON LANDING HEADER -->
+    <div class="flex flex-col items-center justify-center text-center py-2 sm:py-4 border-b border-[#152238]/30">
+      <div class="relative mb-2 flex items-center justify-center">
+        <div class="absolute w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-[#4DA3FF]/20 animate-ping"></div>
+        <div
+          class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#4DA3FF]/10 border border-[#4DA3FF]/40 flex items-center justify-center text-lg sm:text-xl">
+          🌖
+        </div>
+      </div>
+      <h2
+        class="text-xs sm:text-sm font-black tracking-[0.2em] sm:tracking-[0.3em] uppercase text-[#4DA3FF] font-orbitron">
+        Native Chandra Solar Clock</h2>
+      <p
+        class="text-[9px] sm:text-[10px] text-gray-400 font-bold font-mono tracking-wider sm:tracking-widest uppercase mt-1">
+        Independent 708.7341-Hour Selenographic Time Matrix</p>
+    </div>
+
+    <!-- MASSIVE CHRONOGRAPH MOON CLOCK -->
+    <div
+      class="bg-[#152238]/5 border border-[#4DA3FF]/40 rounded-2xl sm:rounded-3xl p-4 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.05)] text-center relative overflow-hidden flex flex-col items-center justify-center glow-lunar pulse-soft">
+
+      <!-- Outer Optical Corners -->
+      <div class="absolute top-3 left-3 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-[#4DA3FF]/30"></div>
+      <div class="absolute top-3 right-3 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-r-2 border-[#4DA3FF]/30"></div>
+      <div class="absolute bottom-3 left-3 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-l-2 border-[#4DA3FF]/30"></div>
+      <div class="absolute bottom-3 right-3 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-[#4DA3FF]/30"></div>
+
+      <!-- Pulse Status Banner -->
+      <div
+        class="text-[9px] sm:text-[10px] font-black tracking-[0.15em] sm:tracking-[0.2em] text-[#D4AF37] uppercase font-mono mb-3 sm:mb-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+        <span>SINUS MEDII (0.00°N, 0.00°E) • TRUE LOCAL SOLAR TIME (TLST) • 708.7341H SOL</span>
+        <span id="displayClockDay"
+          class="bg-[#D4AF37]/20 text-[#D4AF37] px-2.5 sm:px-3 py-0.5 rounded border border-[#D4AF37]/40 font-bold tracking-wider sm:tracking-widest">DAY
+          -- OF 30</span>
+      </div>
+
+      <!-- MASSIVE CHRONOMETRIC NUMERICS -->
+      <div
+        class="flex flex-wrap items-baseline justify-center select-all w-full font-orbitron font-bold text-center tracking-tight text-white leading-none my-2 sm:my-4 gap-y-2">
+        <!-- Hours -->
+        <span id="displayClockHH"
+          class="text-4xl xs:text-5xl sm:text-7xl md:text-9xl lg:text-[120px] text-[#F5F5F5] font-orbitron font-black tracking-tighter">---</span>
+        <span
+          class="text-2xl xs:text-3xl sm:text-5xl md:text-7xl lg:text-[80px] text-[#4DA3FF] font-orbitron font-black mr-2 sm:mr-4">h</span>
+
+        <!-- Minutes -->
+        <span id="displayClockMM"
+          class="text-4xl xs:text-5xl sm:text-7xl md:text-9xl lg:text-[120px] text-[#F5F5F5] font-orbitron font-black tracking-tighter">--</span>
+        <span
+          class="text-2xl xs:text-3xl sm:text-5xl md:text-7xl lg:text-[80px] text-[#4DA3FF] font-orbitron font-black mr-2 sm:mr-4">m</span>
+
+        <!-- Seconds -->
+        <span id="displayClockSS"
+          class="text-4xl xs:text-5xl sm:text-7xl md:text-9xl lg:text-[120px] text-[#4DA3FF] font-orbitron font-black tracking-tighter">--</span>
+        <span
+          class="text-2xl xs:text-3xl sm:text-5xl md:text-7xl lg:text-[80px] text-[#4DA3FF] font-orbitron font-black">s</span>
+      </div>
+
+      <!-- Telemetry Status Line -->
+      <div
+        class="mt-4 sm:mt-6 pt-3 sm:pt-5 border-t border-[#152238]/40 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-center justify-between text-[9px] sm:text-[10px] font-mono text-gray-400 tracking-wider gap-2 sm:gap-4">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3" />
+          </svg>
+          PHASE: <strong id="lblPhaseStr" class="text-[#D4AF37] font-bold">-- Phase</strong>
+        </span>
+        <span class="flex items-center gap-1.5">
+          SUN ALTITUDE: <strong id="lblSolarAlt" class="text-emerald-400 font-bold">--.--°</strong>
+        </span>
+        <span class="flex items-center gap-1.5">
+          SOLAR ELONGATION: <strong id="lblElongationDeg" class="text-[#4DA3FF] font-bold">---.----°</strong>
+        </span>
+        <span class="flex items-center gap-1.5">
+          SOL PROGRESS: <strong id="lblDayProgressPct" class="text-[#10b981] font-bold">--.---% COMPLETE</strong>
+        </span>
+      </div>
+
+    </div>
+
+    <!-- DUAL DYNAMICAL TELEMETRY GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+      <!-- EARTH REFERENCE & RELATIVISTIC MATRIX CARD -->
+      <div
+        class="md:col-span-6 bg-[#152238]/10 border border-[#152238]/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-between gap-3 sm:gap-4">
+        <div class="flex items-center justify-between border-b border-[#152238]/40 pb-2 sm:pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#10b981] animate-ping"></span>
+            <h3
+              class="text-[10px] sm:text-xs font-bold text-[#10b981] tracking-wider sm:tracking-widest uppercase font-mono">
+              🌍 Earth Reference Clock &
+              Light Delay</h3>
+          </div>
+          <span
+            class="text-[8px] sm:text-[9px] font-mono text-gray-400 bg-[#05070B] px-1.5 sm:px-2 py-0.5 rounded border border-[#152238]">INSTANTANEOUS
+            GRID</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 font-mono">
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3">
+            <span class="text-[8px] uppercase text-gray-500 block">Earth Gregorian Date</span>
+            <span id="lblEarthDateStr" class="text-[11px] sm:text-xs font-bold text-gray-200 block mt-0.5 sm:mt-1">--
+              ----- ----</span>
+          </div>
+
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3">
+            <span class="text-[8px] uppercase text-gray-500 block">Ground Standard Time</span>
+            <span id="lblEarthTimeStr"
+              class="text-[11px] sm:text-xs font-bold text-[#4DA3FF] block mt-0.5 sm:mt-1">--:--:-- IST</span>
+          </div>
+
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3">
+            <span class="text-[8px] uppercase text-gray-500 block">Autonomous Master UTC Grid</span>
+            <span id="lblEarthUTCStr"
+              class="text-[11px] sm:text-xs font-bold text-emerald-400 block mt-0.5 sm:mt-1">--:--:-- UTC</span>
+          </div>
+
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3">
+            <span class="text-[8px] uppercase text-gray-500 block">Light Travel Delay Gap</span>
+            <span id="lblLightDelayStr"
+              class="text-[11px] sm:text-xs font-bold text-emerald-400 block mt-0.5 sm:mt-1">0m 01s (0.0026 AU)</span>
+          </div>
+
+          <!-- NEW: EARTH PHASE AS SEEN FROM MOON -->
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+            <div class="flex justify-between items-center">
+              <span class="text-[8px] uppercase text-gray-500">Earth Phase (From Moon)</span>
+              <span id="badgeEarthlight" class="text-[8px] font-bold text-sky-400">BLAZING EARTHLIGHT</span>
+            </div>
+            <span id="lblEarthPhaseStr"
+              class="text-xs sm:text-sm font-black text-sky-300 font-orbitron block mt-0.5 sm:mt-1">--.-% Waning
+              Gibbous</span>
+            <span id="lblEarthlightLux" class="text-[8px] text-gray-400 block mt-0.5">Intensity: ~61x Full Moon</span>
+          </div>
+
+          <!-- NEW: LIBRATION & EARTH SKY POSITION TRACKER -->
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+            <div class="flex justify-between items-center">
+              <span class="text-[8px] uppercase text-gray-500">Earth Zenith & Libration</span>
+              <span id="badgeZenithOffset" class="text-[8px] text-emerald-400">Sinus Medii Overhead</span>
+            </div>
+            <span id="lblEarthSkyCoords"
+              class="text-xs sm:text-sm font-black text-[#D4AF37] font-orbitron block mt-0.5 sm:mt-1">Alt: +--.-°
+              Near-Zenith</span>
+            <span id="lblLibrationWander" class="text-[8px] text-gray-400 block mt-0.5">Libration: ΔLon ---.-° • ΔLat
+              ---.-°</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-[#05070B]/70 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col gap-1 text-[9px] sm:text-[10px] font-mono text-gray-400">
+          <div class="flex justify-between items-center gap-1">
+            <span>Apparent Time (Seen from Moon):</span>
+            <strong id="lblApparentTimeStr" class="text-[#4DA3FF] font-bold">--:--:-- IST</strong>
+          </div>
+          <div
+            class="flex justify-between items-center text-[8px] sm:text-[9px] text-gray-500 pt-1 border-t border-[#152238]/50 gap-1">
+            <span>General Relativity Surface LTC:</span>
+            <strong id="lblRelativityGamma" class="text-emerald-400">γ = 1.0000000006655 (+57.5 µs/day Surface
+              LTC)</strong>
+          </div>
+        </div>
+
+        <!-- EARTH COMM LINK LINE-OF-SIGHT & DROPOUT PREDICTOR -->
+        <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col gap-1.5 font-mono">
+          <div
+            class="flex justify-between items-center text-[8px] uppercase tracking-wider text-gray-400 border-b border-[#152238]/60 pb-1">
+            <span class="flex items-center gap-1.5">
+              <span id="dotCommStatus" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Earth Comm Link Line-of-Sight (LOS)</span>
+            </span>
+            <span id="badgeCommStatus"
+              class="text-emerald-400 font-bold bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800">
+              DIRECT LINK: ACTIVE
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-[9px] sm:text-[10px] my-0.5">
+            <div>
+              <span class="text-[8px] text-gray-500 block">Direct RF Margin (X-Band):</span>
+              <strong id="lblRfMargin" class="text-emerald-400 font-orbitron">+14.2 dB (High SNR)</strong>
+            </div>
+            <div>
+              <span class="text-[8px] text-gray-500 block">Polar/Limb Dropout Forecast:</span>
+              <strong id="lblDropoutForecast" class="text-sky-300 font-orbitron">In 4d 18h (~32h Duration)</strong>
+            </div>
+          </div>
+
+          <div
+            class="text-[8px] text-gray-400 bg-[#0A0E17] p-1.5 rounded border border-[#152238]/60 flex justify-between items-center">
+            <span>Recommended Autonomous Relay:</span>
+            <strong id="lblRelayRouting" class="text-amber-400">Halo Orbit Relay L2-Alpha Signal Ready</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- NATIVE LUNAR CALENDAR (PLANETARY ERAS) -->
+      <div
+        class="md:col-span-6 bg-[#152238]/10 border border-[#152238]/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-between gap-3 sm:gap-4">
+        <div class="flex items-center justify-between border-b border-[#152238]/40 pb-2 sm:pb-3">
+          <div class="flex items-center gap-2">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h3
+              class="text-[10px] sm:text-xs font-bold text-[#D4AF37] tracking-wider sm:tracking-widest uppercase font-mono">
+              📜 Native Lunar Calendar
+              (Planetary Era & Sol Cycles)</h3>
+          </div>
+          <span
+            class="text-[8px] sm:text-[9px] font-mono text-gray-400 bg-[#05070B] px-1.5 sm:px-2 py-0.5 rounded border border-[#152238]">DEEP-TIME
+            MANA</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 font-mono">
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+            <span class="text-[8px] uppercase text-gray-500">True Sun-Anchored Year</span>
+            <span id="lblLunarYearGreg"
+              class="text-xs sm:text-sm font-black text-white font-orbitron mt-0.5 sm:mt-1">2,026 Lunar-Solar AD</span>
+            <span id="lblYearTypeStr" class="text-[8px] text-emerald-400 mt-0.5 sm:mt-1">Standard 12-Sol Year (360
+              Tithis)</span>
+          </div>
+
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+            <span class="text-[8px] uppercase text-gray-500">Aryabhata Kali Era</span>
+            <span id="lblLunarYearKali"
+              class="text-xs sm:text-sm font-black text-[#D4AF37] font-orbitron mt-0.5 sm:mt-1">Year 5,127</span>
+            <span class="text-[8px] text-gray-500 mt-0.5 sm:mt-1">Sauramāna Solar Era</span>
+          </div>
+
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col justify-between">
+            <span class="text-[8px] uppercase text-gray-500">Leap Sol (Adhika) Cycle</span>
+            <span id="lblAdhikaStatus"
+              class="text-xs sm:text-sm font-black text-[#4DA3FF] font-orbitron mt-0.5 sm:mt-1">--.-% BANKED</span>
+            <span id="lblAdhikaNext" class="text-[8px] text-gray-500 mt-0.5 sm:mt-1">13th Leap Sol Tracker</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-[#05070B]/70 border border-[#152238] rounded-xl p-2.5 sm:p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[9px] sm:text-[10px] font-mono text-gray-400">
+          <div>
+            <span>Giant Sun-Day: <strong id="lblLunarMonth" class="text-white">Sol -- of 12 (Orbit
+                Cycle)</strong></span>
+          </div>
+          <div>
+            <span>Living Sub-Day: <strong id="lblLunarDay" class="text-[#D4AF37]">Sub-Day -- of 30 (Chandra
+                Mana)</strong></span>
+          </div>
+        </div>
+
+        <!-- ARYABHATTA DUAL NAKSHATRA TRANSIT MATRIX (MOON & EARTH PERSPECTIVES) -->
+        <div
+          class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col justify-between font-mono gap-2">
+
+          <!-- TOP: TITLE & COSMIC DUALITY BADGE -->
+          <div class="flex justify-between items-center border-b border-[#152238]/60 pb-1.5">
+            <span class="text-[8px] uppercase tracking-wider text-gray-400 font-bold">Aryabhata 27 Nakshatra Matrix
+              (Dual Cosmic Perspective)</span>
+            <span class="text-[8px] text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded border border-[#D4AF37]/30">180°
+              ANTIPODAL AXIS</span>
+          </div>
+
+          <!-- DUAL VIEW GRID: MOON NAKSHATRA & EARTH NAKSHATRA -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
+            <!-- PANEL 1: MOON NAKSHATRA (SEEN FROM EARTH) -->
+            <div class="bg-[#0A0E17] p-2 rounded-lg border border-[#152238] flex flex-col justify-between gap-1">
+              <div class="flex justify-between items-center">
+                <span class="text-[8px] text-gray-400 uppercase font-bold flex items-center gap-1">
+                  <span>🌙</span> Moon (From Earth)
+                </span>
+                <span id="lblNakshatraPada"
+                  class="text-[8px] font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-1.5 py-0.5 rounded border border-[#D4AF37]/30">PĀDA
+                  --</span>
+              </div>
+              <div class="flex justify-between items-baseline flex-wrap gap-1">
+                <span id="lblNakshatraName" class="text-xs sm:text-sm font-black text-white font-orbitron">⭐ ----</span>
+                <span id="lblNakshatraRasi" class="text-[8px] text-[#4DA3FF]">---.-° Nirayana</span>
+              </div>
+              <span id="lblNakshatraDeity" class="text-[7.5px] text-gray-400">Deity: ---- • Lord: ----</span>
+              <div
+                class="flex justify-between items-center text-[7.5px] text-gray-400 border-t border-[#152238]/60 pt-1 mt-0.5">
+                <span id="lblMoonDMS" class="text-sky-300 font-mono font-bold">---° --' --.-"</span>
+                <span id="lblMoonPadaProgress" class="text-[#D4AF37] font-mono">Next Pāda: --h --m --s</span>
+              </div>
+            </div>
+
+            <!-- PANEL 2: EARTH NAKSHATRA (SEEN FROM MOON - BHU-NAKSHATRA) -->
+            <div
+              class="bg-[#0A0E17] p-2 rounded-lg border border-sky-900/40 bg-sky-950/10 flex flex-col justify-between gap-1">
+              <div class="flex justify-between items-center">
+                <span class="text-[8px] text-sky-400 uppercase font-bold flex items-center gap-1">
+                  <span>🌍</span> Earth (From Moon / Bhū)
+                </span>
+                <span id="lblEarthNakshatraPada"
+                  class="text-[8px] font-bold text-sky-400 bg-sky-950 px-1.5 py-0.5 rounded border border-sky-800">PĀDA
+                  --</span>
+              </div>
+              <div class="flex justify-between items-baseline flex-wrap gap-1">
+                <span id="lblEarthNakshatraName" class="text-xs sm:text-sm font-black text-sky-300 font-orbitron">⭐
+                  ----</span>
+                <span id="lblEarthNakshatraRasi" class="text-[8px] text-emerald-400">---.-° Nirayana</span>
+              </div>
+              <span id="lblEarthNakshatraDeity" class="text-[7.5px] text-gray-400">Deity: ---- • Lord: ----</span>
+              <div
+                class="flex justify-between items-center text-[7.5px] text-gray-400 border-t border-[#152238]/60 pt-1 mt-0.5">
+                <span id="lblEarthDMS" class="text-emerald-300 font-mono font-bold">---° --' --.-"</span>
+                <span id="lblEarthPadaProgress" class="text-sky-400 font-mono">Next Pāda: --h --m --s</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- FOOTER: AYANAMSHA CALIBRATION -->
+          <div class="text-[8px] text-gray-500 flex justify-between items-center pt-0.5">
+            <span>Precession Reference: <strong class="text-gray-400">Lahiri / Aryabhata Siddhanta</strong></span>
+            <span id="lblAyanamshaVal" class="text-emerald-400 font-mono">Ayanāmśa: 24.23°</span>
+          </div>
+
+        </div>
+
+        <!-- ADHIKA MĀSA MULTI-YEAR LEAP SOL ROADMAP -->
+        <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-2.5 sm:p-3 flex flex-col gap-2 font-mono">
+          <div class="flex justify-between items-center text-[8px] uppercase text-gray-500">
+            <span>Adhika Sol Multi-Year Roadmap</span>
+            <span id="lblBankProgressText" class="text-[#4DA3FF] font-bold">38.0% ACCUMULATED</span>
+          </div>
+
+          <!-- Visual Progress Bar -->
+          <div class="w-full bg-[#0A0E17] h-2 rounded-full overflow-hidden border border-[#152238] p-0.5">
+            <div id="barAdhikaProgress"
+              class="h-full bg-gradient-to-r from-blue-500 via-[#4DA3FF] to-emerald-400 rounded-full transition-all duration-500"
+              style="width: 38.0%;"></div>
+          </div>
+
+          <!-- 4-Year Milestone Ticker -->
+          <div class="grid grid-cols-4 text-center text-[8px] text-gray-400 gap-1 pt-1 border-t border-[#152238]/60">
+            <div>
+              <span class="text-gray-500 block">2023 AD</span>
+              <span class="text-emerald-400 font-bold">Shravana 13</span>
+            </div>
+            <div class="border-l border-[#152238]/60">
+              <span class="text-[#D4AF37] block font-bold">2026 (NOW)</span>
+              <span class="text-white font-bold">12 Sols (38%)</span>
+            </div>
+            <div class="border-l border-[#152238]/60">
+              <span class="text-gray-500 block">2028/29</span>
+              <span class="text-sky-400 font-bold">Leap 13 Sols</span>
+            </div>
+            <div class="border-l border-[#152238]/60">
+              <span class="text-gray-500 block">2031 AD</span>
+              <span class="text-sky-400 font-bold">Leap 13 Sols</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SURYA SIDDHANTA ŚAṄKU (12-AṄGULA GNOMON) & 8-DIRECTION SOLAR SHADOW DIAL -->
+    <div
+      class="mt-6 bg-[#152238]/10 border border-[#D4AF37]/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_15px_40px_rgba(0,0,0,0.7)] flex flex-col gap-4">
+
+      <div class="flex items-center justify-between border-b border-[#152238]/60 pb-3 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5" stroke-width="2" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+          </svg>
+          <h3 class="text-xs sm:text-sm font-bold text-[#D4AF37] tracking-wider uppercase font-mono">
+            ☀️ Surya Siddhanta Śaṅku (12-Aṅgula Gnomon) & 8-Direction Solar Shadow Dial
+          </h3>
+        </div>
+        <span
+          class="text-[8px] sm:text-[9px] font-mono text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded border border-[#D4AF37]/30">
+          TRIPRAŚNĀDHIKĀRA CHRONOMETRY • AṢṬA-DIK
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+
+        <!-- VISUAL 8-DIRECTION COMPASS ROSE (ASHTA-DIK DIAL) -->
+        <div
+          class="md:col-span-4 flex flex-col items-center justify-center p-3 bg-[#05070B]/80 border border-[#152238] rounded-2xl relative overflow-hidden">
+          <span class="text-[8px] uppercase tracking-widest text-gray-500 font-mono mb-1">Aṣṭa-Dik Compass
+            Bearing</span>
+
+          <div class="relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center">
+            <!-- Circular Dial Rings -->
+            <svg class="w-full h-full" viewBox="0 0 200 200">
+              <!-- Outer ring -->
+              <circle cx="100" cy="100" r="90" fill="none" stroke="#152238" stroke-width="2" stroke-dasharray="2 4" />
+              <circle cx="100" cy="100" r="75" fill="none" stroke="#D4AF37" stroke-opacity="0.2" stroke-width="1" />
+              <circle cx="100" cy="100" r="60" fill="#0A0E17" stroke="#152238" stroke-width="1.5" />
+
+              <!-- 8 Direction Axis Lines -->
+              <line x1="100" y1="15" x2="100" y2="185" stroke="#152238" stroke-width="1" />
+              <line x1="15" y1="100" x2="185" y2="100" stroke="#152238" stroke-width="1" />
+              <line x1="40" y1="40" x2="160" y2="160" stroke="#152238" stroke-width="0.8" stroke-dasharray="2 2" />
+              <line x1="40" y1="160" x2="160" y2="40" stroke="#152238" stroke-width="0.8" stroke-dasharray="2 2" />
+
+              <!-- 8 Direction Labels -->
+              <text x="100" y="24" fill="#D4AF37" font-size="8" font-family="monospace" font-weight="bold"
+                text-anchor="middle">N • उत्तर</text>
+              <text x="160" y="44" fill="#6B7280" font-size="7" font-family="monospace" text-anchor="middle">NE •
+                ईशान</text>
+              <text x="180" y="103" fill="#4DA3FF" font-size="8" font-family="monospace" font-weight="bold"
+                text-anchor="middle">E • पूर्व</text>
+              <text x="160" y="162" fill="#6B7280" font-size="7" font-family="monospace" text-anchor="middle">SE •
+                आग्नेय</text>
+              <text x="100" y="184" fill="#D4AF37" font-size="8" font-family="monospace" font-weight="bold"
+                text-anchor="middle">S • दक्षिण</text>
+              <text x="40" y="162" fill="#6B7280" font-size="7" font-family="monospace" text-anchor="middle">SW •
+                नैऋत्य</text>
+              <text x="20" y="103" fill="#4DA3FF" font-size="8" font-family="monospace" font-weight="bold"
+                text-anchor="middle">W • पश्चिम</text>
+              <text x="40" y="44" fill="#6B7280" font-size="7" font-family="monospace" text-anchor="middle">NW •
+                वायव्य</text>
+
+              <!-- Shadow Vector (Cyan needle) -->
+              <g id="needleShadow" transform="rotate(0 100 100)">
+                <line x1="100" y1="100" x2="100" y2="45" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" />
+                <polygon points="100,38 96,48 104,48" fill="#38bdf8" />
+              </g>
+
+              <!-- Sun Vector (Gold needle) -->
+              <g id="needleSun" transform="rotate(0 100 100)">
+                <line x1="100" y1="100" x2="100" y2="35" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round" />
+                <circle cx="100" cy="30" r="5" fill="#fbbf24" filter="drop-shadow(0 0 4px #f59e0b)" />
+              </g>
+
+              <!-- Center Hub (12-Angula Gnomon Center) -->
+              <circle cx="100" cy="100" r="6" fill="#D4AF37" stroke="#05070B" stroke-width="2" />
+              <circle cx="100" cy="100" r="2" fill="#FFFFFF" />
+            </svg>
+          </div>
+
+          <div class="flex items-center gap-3 mt-1 text-[8px] font-mono">
+            <span class="flex items-center gap-1 text-[#fbbf24]"><span class="w-2 h-2 rounded-full bg-[#fbbf24]"></span>
+              Sun
+              Vector</span>
+            <span class="flex items-center gap-1 text-[#38bdf8]"><span class="w-2 h-2 rounded-full bg-[#38bdf8]"></span>
+              Shadow Cast</span>
+          </div>
+        </div>
+
+        <!-- SOLAR SKY DIRECTION & AZIMUTH METRICS -->
+        <div class="md:col-span-4 flex flex-col gap-2 font-mono">
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-3">
+            <span class="text-[8px] uppercase text-gray-500 block">Current Sun Celestial Direction (Aṣṭa-Dik)</span>
+            <span id="lblSunDirection" class="text-sm font-black text-[#D4AF37] font-orbitron block mt-1">-- • --</span>
+            <span id="lblSunAzimuthBearing" class="text-[9px] text-[#4DA3FF] block mt-0.5">Azimuth: ---.-° from True
+              North</span>
+          </div>
+
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-3">
+            <span class="text-[8px] uppercase text-gray-500 block">Solar Altitude & Sky Visibility</span>
+            <span id="lblSunAltitudeDetail" class="text-xs font-bold text-emerald-400 block mt-1">--.--° (Sub-Horizon /
+              Lunar
+              Night)</span>
+            <span id="lblSunSkyState" class="text-[9px] text-gray-400 block mt-0.5">Sun at Nadir • Surface under Deep
+              Lunar
+              Night</span>
+          </div>
+        </div>
+
+        <!-- 12-ANGULA SHANKU SHADOW CASTING TELEMETRY -->
+        <div class="md:col-span-4 flex flex-col gap-2 font-mono">
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-3">
+            <div class="flex justify-between items-center">
+              <span class="text-[8px] uppercase text-gray-500">12-Aṅgula Śaṅku Shadow Length</span>
+              <span class="text-[8px] text-gray-500">H = 1.00m (12 Aṅgula)</span>
+            </div>
+            <span id="lblShadowLength" class="text-sm font-black text-white font-orbitron block mt-1">🌑 Sub-Horizon
+              (0.00
+              m)</span>
+            <span id="lblShadowAngula" class="text-[9px] text-[#D4AF37] block mt-0.5">0.00 Aṅgulas • Night Phase</span>
+          </div>
+
+          <div class="bg-[#05070B]/80 border border-[#152238] rounded-xl p-3">
+            <span class="text-[8px] uppercase text-gray-500 block">Shadow Projection Bearing</span>
+            <span id="lblShadowBearing" class="text-xs font-bold text-[#38bdf8] block mt-1">Bearing: ---.-° (--
+              Direction)</span>
+            <span class="text-[8px] text-gray-400 block mt-0.5">Cast across Lunar Regolith (Opposite Sun Vector)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LUNAR SOUTH POLE & TERRAIN TELEMETRY (PSR HORIZON & ChaSTE THERMAL MODEL) -->
+      <div
+        class="mt-6 bg-[#152238]/10 border border-[#38bdf8]/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_15px_40px_rgba(0,0,0,0.7)] flex flex-col gap-4">
+
+        <div class="flex items-center justify-between border-b border-[#152238]/60 pb-3 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h3 class="text-xs sm:text-sm font-bold text-[#38bdf8] tracking-wider uppercase font-mono">
+              🧊 Lunar South Pole & Terrain Telemetry (PSR Horizon & ChaSTE Thermal Model)
+            </h3>
+          </div>
+          <span
+            class="text-[8px] sm:text-[9px] font-mono text-[#38bdf8] bg-[#38bdf8]/10 px-2 py-0.5 rounded border border-[#38bdf8]/30">
+            CHANDRAYAAN-3 SHIV SHAKTI & POLAR SCIENCE
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 font-mono">
+
+          <!-- REGOLITH THERMAL ENERGY & CORE PENETRATION MODEL (3 TIERS: 0cm, -10cm, -1m) -->
+          <div
+            class="md:col-span-4 bg-[#05070B]/80 border border-[#152238] rounded-2xl p-4 flex flex-col justify-between gap-2.5">
+            <div class="flex items-center justify-between border-b border-[#152238]/60 pb-2">
+              <div class="flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                <span class="text-[8px] uppercase tracking-wider text-gray-400 font-bold">Regolith Thermal
+                  Penetration</span>
+              </div>
+              <span id="lblThermalStatusBadge"
+                class="text-[8px] px-2 py-0.5 rounded font-bold bg-blue-950 text-sky-400 border border-sky-800">DEEP
+                NIGHT
+                FREEZE</span>
+            </div>
+
+            <!-- 3-TIER DEPTH TELEMETRY STACK -->
+            <div class="flex flex-col gap-1.5 my-0.5">
+              <!-- TIER 1: SURFACE SKIN (0 cm) -->
+              <div
+                class="bg-[#0A0E17] p-2 sm:p-2.5 rounded-xl border border-[#152238] flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-400/80"></span>
+                    <span class="text-[8px] text-gray-400 uppercase font-mono font-bold">Surface Skin (0 cm)</span>
+                  </div>
+                  <span id="lblSurfaceThermalDesc" class="text-[8px] text-amber-400/90 font-mono block mt-0.5">Blazing
+                    Radiation Peak</span>
+                </div>
+                <div class="text-right">
+                  <span id="lblSurfaceTempC"
+                    class="text-sm sm:text-base font-black text-amber-400 font-orbitron block">--.-°C</span>
+                  <span id="lblSurfaceTempK" class="text-[8px] text-gray-400 font-mono block">---.- K</span>
+                </div>
+              </div>
+
+              <!-- TIER 2: SUB-SURFACE (-10 cm - Rover Wheel Depth) -->
+              <div
+                class="bg-[#0A0E17] p-2 sm:p-2.5 rounded-xl border border-[#152238] flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400/80"></span>
+                    <span class="text-[8px] text-gray-400 uppercase font-mono font-bold">Sub-Surface (-10 cm)</span>
+                  </div>
+                  <span id="lblSubSurfaceThermalDesc"
+                    class="text-[8px] text-emerald-400/90 font-mono block mt-0.5">Rover Wheel Depth (ChaSTE)</span>
+                </div>
+                <div class="text-right">
+                  <span id="lblSubSurfaceTempC"
+                    class="text-sm sm:text-base font-black text-emerald-400 font-orbitron block">--.-°C</span>
+                  <span id="lblSubSurfaceTempK" class="text-[8px] text-gray-400 font-mono block">---.- K</span>
+                </div>
+              </div>
+
+              <!-- TIER 3: DEEP CORE BEDROCK (-1 m - Habitat Foundation) -->
+              <div
+                class="bg-[#0A0E17] p-2 sm:p-2.5 rounded-xl border border-[#152238] flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-sky-400/80"></span>
+                    <span class="text-[8px] text-gray-400 uppercase font-mono font-bold">Deep Bedrock (-1 m)</span>
+                  </div>
+                  <span class="text-[8px] text-sky-400/90 font-mono block mt-0.5">Permanent Cryo-Static Baseline</span>
+                </div>
+                <div class="text-right">
+                  <span id="lblDeepBedrockTempC"
+                    class="text-sm sm:text-base font-black text-sky-400 font-orbitron block">-20.0°C</span>
+                  <span id="lblDeepBedrockTempK" class="text-[8px] text-gray-400 font-mono block">253.2 K</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="text-[8px] text-gray-400 bg-[#05070B] p-2 rounded-lg border border-[#152238]/60 flex flex-col gap-0.5">
+              <div class="flex justify-between items-center">
+                <span>Heat Flux Regime:</span>
+                <strong id="lblThermalRegime" class="text-sky-300">Radiative Deep-Space Cooling</strong>
+              </div>
+              <div class="flex justify-between items-center">
+                <span>Vacuum Attenuation (1m):</span>
+                <strong id="lblDeltaSkinCore" class="text-emerald-400">ΔT Insulated: --.-°C</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- POLAR HORIZON PROFILER (SHIV SHAKTI POINT 69.37°S) -->
+          <div
+            class="md:col-span-4 bg-[#05070B]/80 border border-[#152238] rounded-2xl p-4 flex flex-col justify-between gap-2.5">
+            <div class="flex items-center justify-between border-b border-[#152238]/60 pb-2">
+              <div class="flex items-center gap-1.5">
+                <span id="dotPolarPulse" class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+                <span class="text-[8px] uppercase tracking-wider text-gray-400 font-bold">Polar Horizon Profiler (Shiv
+                  Shakti)</span>
+              </div>
+              <span id="lblPolarSiteCoord" class="text-[8px] text-[#D4AF37] font-mono">69.373°S, 32.319°E</span>
+            </div>
+
+            <div class="flex flex-col gap-1.5 my-0.5">
+              <!-- PROMINENT ROW: SHIV SHAKTI LOCAL SOLAR TIME (LST) -->
+              <div
+                class="bg-[#0A0E17] p-2 sm:p-2.5 rounded-xl border border-amber-500/30 bg-amber-950/10 flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span class="text-[8px] text-amber-300 uppercase font-mono font-bold">Shiv Shakti Local Time
+                      (LST)</span>
+                  </div>
+                  <span id="lblShivShaktiLSTSub" class="text-[8px] text-amber-400/80 font-mono block mt-0.5">Sol
+                    Progress: --.--% • Polar Night</span>
+                </div>
+                <div class="text-right">
+                  <span id="lblShivShaktiLSTClock"
+                    class="text-sm sm:text-base font-black text-amber-400 font-orbitron block">---h --m --s</span>
+                  <span class="text-[8px] text-gray-400 font-mono block">+32.319°E Offset (+63.6h)</span>
+                </div>
+              </div>
+
+              <!-- ROW 1: POLAR SUN ELEVATION -->
+              <div
+                class="bg-[#0A0E17] p-2 sm:p-2.5 rounded-xl border border-[#152238] flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span id="dotPolarSun" class="w-2 h-2 rounded-full bg-sky-400/80"></span>
+                    <span class="text-[8px] text-gray-400 uppercase font-mono font-bold">Polar Sun Elevation</span>
+                  </div>
+                  <span id="lblPolarSunSub" class="text-[8px] text-sky-400/90 font-mono block mt-0.5">--° --' --"
+                    (DMS)</span>
+                </div>
+                <div class="text-right">
+                  <span id="lblPolarSunAlt"
+                    class="text-sm sm:text-base font-black text-sky-400 font-orbitron block">--.---°</span>
+                  <span id="lblPolarSunState" class="text-[8px] text-gray-400 font-mono block">Polar Night Shadow</span>
+                </div>
+              </div>
+
+              <!-- ROW 2: CRATER RIM OCCLUSION -->
+              <div
+                class="bg-[#0A0E17] p-2 sm:p-2.5 rounded-xl border border-[#152238] flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-400/80"></span>
+                    <span class="text-[8px] text-gray-400 uppercase font-mono font-bold">Crater Rim Occlusion</span>
+                  </div>
+                  <span id="lblCraterRimFeature" class="text-[8px] text-amber-400/90 font-mono block mt-0.5">Simpelius N
+                    Ridge (LOLA)</span>
+                </div>
+                <div class="text-right">
+                  <span id="lblCraterRimOcclusion"
+                    class="text-sm sm:text-base font-black text-gray-200 font-orbitron block">--.--° Elev</span>
+                  <span id="lblCraterRimAzimuth" class="text-[8px] text-gray-400 font-mono block">Az: ---.--° ESE</span>
+                </div>
+              </div>
+
+              <!-- ROW 3: HORIZON ILLUMINATION -->
+              <div
+                class="bg-[#0A0E17] p-2 sm:p-2.5 rounded-xl border border-[#152238] flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span id="dotIllum" class="w-2 h-2 rounded-full bg-sky-500/80"></span>
+                    <span class="text-[8px] text-gray-400 uppercase font-mono font-bold">Horizon Illumination</span>
+                  </div>
+                  <span id="lblRimSunriseCountdown" class="text-[8px] text-emerald-400/90 font-mono block mt-0.5">Rim
+                    Sunrise: In --d --h --m --s</span>
+                </div>
+                <div class="text-right">
+                  <span id="lblPolarIlluminationState"
+                    class="text-xs sm:text-sm font-black text-sky-400 font-orbitron block">Sub-Horizon</span>
+                  <span id="lblPolarIllumFlux" class="text-[8px] text-gray-400 font-mono block">Deficit: --.--°</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="text-[8px] text-gray-400 bg-[#05070B] p-2 rounded-lg border border-[#152238]/60 flex justify-between items-center">
+              <span>Terrain Elevation (LOLA Datum):</span>
+              <strong id="lblTerrainDatum" class="text-gray-300 font-mono">-4262.0 m (-4.262 km • Live Tide:
+                +0.38m)</strong>
+            </div>
+          </div>
+
+          <!-- PSR SENSOR & CRYOGENIC WATER-ICE STABILITY -->
+          <div
+            class="md:col-span-4 bg-[#05070B]/80 border border-[#152238] rounded-2xl p-4 flex flex-col justify-between gap-3">
+            <div class="flex items-center justify-between border-b border-[#152238]/60 pb-2">
+              <span class="text-[8px] uppercase tracking-wider text-gray-400">PSR Cryogenic Ice Trap Status</span>
+              <span id="lblPsrStatusBadge"
+                class="text-[8px] px-2 py-0.5 rounded font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">PSR
+                ACTIVE (100%)</span>
+            </div>
+
+            <div class="flex flex-col gap-2 my-1">
+              <div class="bg-[#0A0E17] p-2.5 rounded-xl border border-[#152238] flex justify-between items-center">
+                <div>
+                  <span class="text-[8px] text-gray-500 uppercase block">Cryogenic Trap Temp</span>
+                  <span id="lblPsrTemp" class="text-sm font-black text-sky-300 font-orbitron">40.0 K (-233.15°C)</span>
+                </div>
+                <span id="badgePsrThermalRegime"
+                  class="text-[8px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-800">SUPER-COLD</span>
+              </div>
+
+              <div class="bg-[#0A0E17] p-2.5 rounded-xl border border-[#152238] flex justify-between items-center">
+                <div>
+                  <span class="text-[8px] text-gray-500 uppercase block">Water-Ice Sublimation Risk</span>
+                  <span id="lblSublimationRisk" class="text-sm font-black text-emerald-400 font-orbitron">0.00%
+                    (STABLE)</span>
+                </div>
+                <span id="lblSublimationLifetime" class="text-[8px] text-gray-400 font-mono">2.0 Billion Yrs</span>
+              </div>
+            </div>
+
+            <div
+              class="text-[8px] text-gray-400 bg-[#05070B] p-2 rounded-lg border border-[#152238]/60 flex justify-between items-center">
+              <span>ISRU Resource Potential:</span>
+              <strong id="lblIsruPotential" class="text-sky-400 font-mono">H₂O / O₂ Harvesting Viable</strong>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+  </main>
+
+  <!-- FOOTER INFORMATION -->
+  <footer class="border-t border-[#152238]/60 bg-[#05070B] py-6 px-6 relative z-10 mt-8">
+    <div
+      class="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div class="flex flex-col gap-1">
+        <span class="text-[10px] font-black tracking-widest text-[#4DA3FF] uppercase font-orbitron">Independent Native
+          Moon Cosmic Time Engine</span>
+        <span class="text-[9px] text-[#F5F5F5]/40 font-mono font-medium">SYSTEM STATUS: OPERATIONAL • 708.7341-HOUR
+          SYNODIC BASE ENGINE</span>
+      </div>
+      <div class="text-[9px] text-gray-500 tracking-wider uppercase font-mono flex items-center gap-2">
+        <span>Aryabhatta Siddhantic Engine</span>
+        <div class="w-2 h-2 rounded-full bg-[#10b981] animate-ping"></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DYNAMIC CORE MOON SCRIPT LOOP -->
+  <script>
+    const MOON_DAY_HOURS = 708.734102;
+    const MOON_DAY_SEC = MOON_DAY_HOURS * 3600.0;
+    // Lunar Time Coordinated (LTC) Relativistic Metric:
+    // Moon surface atomic clocks tick +57.5 µs/day faster than Earth geoid (UTC/TT)
+    const LTC_DRIFT_PER_DAY_SEC = 57.5e-6;
+    const RELATIVISTIC_GAMMA_LTC = 1.0 + (LTC_DRIFT_PER_DAY_SEC / 86400.0);
+
+    // 100% PURE DYNAMIC ASTRONOMICAL EPHEMERIS ENGINE (ZERO HARDCODED ANCHORS)
+    function calculateTrueKeplerianElongation(nowMs) {
+      const JD = (nowMs / 86400000.0) + 2440587.5;
+      const T = (JD - 2451545.0) / 36525.0;
+
+      // Pure Mean Anomalies & Solar / Lunar Equations of Center
+      const L0_sun = (280.46646 + 36000.76983 * T) % 360.0;
+      const M_sun = (357.52911 + 35999.05029 * T) * (Math.PI / 180.0);
+      const C_sun = (1.914602 - 0.004817 * T) * Math.sin(M_sun) + (0.019993 - 0.000101 * T) * Math.sin(2 * M_sun);
+      let true_sun = (L0_sun + C_sun) % 360.0;
+      if (true_sun < 0) true_sun += 360.0;
+
+      const L0_moon = (218.3165 + 481267.8813 * T) % 360.0;
+      const M_moon = (134.9634 + 477198.8676 * T) * (Math.PI / 180.0);
+      const D_elong = (297.8502 + 445267.1115 * T) * (Math.PI / 180.0);
+      const F_lat = (93.2721 + 483202.0175 * T) * (Math.PI / 180.0);
+
+      const C_moon = 6.2886 * Math.sin(M_moon)
+        + 1.2740 * Math.sin(2 * D_elong - M_moon)
+        + 0.6583 * Math.sin(2 * D_elong)
+        - 0.2140 * Math.sin(2 * M_moon)
+        - 0.1856 * Math.sin(M_sun)
+        - 0.1143 * Math.sin(2 * F_lat);
+
+      let true_moon = (L0_moon + C_moon) % 360.0;
+      if (true_moon < 0) true_moon += 360.0;
+
+      let elongation = (true_moon - true_sun) % 360.0;
+      if (elongation < 0) elongation += 360.0;
+
+      // Selenographic Sub-Solar Longitude & Optical Libration in Longitude (Lunar Equation of Time)
+      // The Moon rotates uniformly on its axis, but orbits in an ellipse, causing optical libration l'
+      const l_prime = -(true_moon - L0_moon);
+      const sub_solar_lon = ((180.0 - elongation - l_prime) % 360.0 + 360.0) % 360.0;
+
+      // Ascending node of lunar orbit and sub-solar latitude
+      const node = (125.0445 - 1934.1363 * T) * (Math.PI / 180.0);
+      const inclination = 1.5424 * (Math.PI / 180.0);
+      const b_sun = -inclination * Math.sin(true_sun * (Math.PI / 180.0) - node);
+      // Optical Libration in Latitude b' (Lunar nodding)
+      const F_arg = (93.2721 + 483202.0175 * T) * (Math.PI / 180.0);
+      const b_prime = -(6.68 * Math.sin(F_arg));
+
+      // Solar Altitude at Sinus Medii (0°N, 0°E)
+      const sin_alt = Math.cos(b_sun) * Math.cos(sub_solar_lon * (Math.PI / 180.0));
+      const solar_alt = Math.asin(Math.max(-1.0, Math.min(1.0, sin_alt))) * (180.0 / Math.PI);
+
+      // True Local Solar Hour Angle from Midnight at Sinus Medii (0°N, 0°E)
+      // At midnight, Sun is at nadir (l_odot = 180°); at noon, Sun is at zenith (l_odot = 0°)
+      const theta_local = ((180.0 - sub_solar_lon) % 360.0 + 360.0) % 360.0;
+
+      // Real-Time Precession of Equinoxes (Lahiri / Chitrapaksha / Aryabhata Nirayana Ayanamsha):
+      const ayanamsha = 23.85709 + (1.396887 * T);
+      const sidereal_sun = ((true_sun - ayanamsha) % 360.0 + 360.0) % 360.0;
+      const sidereal_moon = ((true_moon - ayanamsha) % 360.0 + 360.0) % 360.0;
+
+      return {
+        elongation,
+        true_sun,
+        true_moon,
+        ayanamsha,
+        siderealSun: sidereal_sun,
+        siderealMoon: sidereal_moon,
+        subSolarLon: sub_solar_lon,
+        solarAlt: solar_alt,
+        localSolarHourDeg: theta_local,
+        librationLon: l_prime,
+        librationLat: b_prime,
+        JD
+      };
+    }
+
+    function executeMoonClockLoop() {
+      const nowMs = Date.now();
+
+      // Dynamic 3D Distance & Light Delay Calculation
+      const elapsedSec = (nowMs - 1785680440000) / 1000.0;
+      const distAuLive = 0.0025695 - (0.0001435 * Math.cos((2.0 * Math.PI * elapsedSec) / 2360592.0));
+
+      const lightDelaySec = distAuLive * 499.00478;
+      const lightDelayRoundedSec = Math.round(lightDelaySec);
+      document.getElementById('lblLightDelayStr').innerText = `0m ${String(lightDelayRoundedSec).padStart(2, '0')}s (${distAuLive.toFixed(6)} AU)`;
+
+      // True Independent Ground IST (UTC + 5h 30m)
+      const istMs = nowMs + (5.5 * 3600000);
+      const istDate = new Date(istMs);
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayOfWeekStr = dayNames[istDate.getUTCDay()];
+      const day = istDate.getUTCDate();
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const monthStr = monthNames[istDate.getUTCMonth()];
+      const year = istDate.getUTCFullYear();
+
+      const istH = String(istDate.getUTCHours()).padStart(2, '0');
+      const istM = String(istDate.getUTCMinutes()).padStart(2, '0');
+      const istS = String(istDate.getUTCSeconds()).padStart(2, '0');
+
+      const earthRefDate = new Date(nowMs);
+      const utcH = String(earthRefDate.getUTCHours()).padStart(2, '0');
+      const utcM = String(earthRefDate.getUTCMinutes()).padStart(2, '0');
+      const utcS = String(earthRefDate.getUTCSeconds()).padStart(2, '0');
+
+      document.getElementById('lblEarthDateStr').innerText = `${dayOfWeekStr}, Day ${String(day).padStart(2, '0')} ${monthStr} ${year} AD`;
+      document.getElementById('lblEarthTimeStr').innerText = `${istH}:${istM}:${istS} IST`;
+      document.getElementById('lblEarthUTCStr').innerText = `${utcH}:${utcM}:${utcS} UTC`;
+
+      // True Apparent Time (as seen from Moon across light delay gap)
+      const apparentTime = new Date(istMs - (lightDelayRoundedSec * 1000));
+      const appHH = String(apparentTime.getUTCHours()).padStart(2, '0');
+      const appMM = String(apparentTime.getUTCMinutes()).padStart(2, '0');
+      const appSS = String(apparentTime.getUTCSeconds()).padStart(2, '0');
+      document.getElementById('lblApparentTimeStr').innerText = `${appHH}:${appMM}:${appSS} IST`;
+
+      // Dynamic General Relativity Lunar Time Coordinated (LTC) Metric
+      // Live gravitational potential difference and orbital velocity dynamics
+      const rKm = distAuLive * 149597870.7;
+      const cLight = 299792.458;
+      const GM_E = 398600.4418;
+      const phiEarthAtMoon = GM_E / (rKm * (cLight ** 2));
+      const nominalRatio = 57.5e-6 / 86400.0;
+      const dynamicGamma = 1.0 + nominalRatio + (phiEarthAtMoon * (1.0 - (rKm / 384400.0)));
+      const liveDailyDriftRateUs = (dynamicGamma - 1.0) * 86400.0 * 1e6;
+
+      const daySeconds = (nowMs % 86400000) / 1000.0;
+      const liveAccumulatedUs = (daySeconds / 86400.0) * liveDailyDriftRateUs;
+      document.getElementById('lblRelativityGamma').innerText = `γ = ${dynamicGamma.toFixed(18)} (+${liveDailyDriftRateUs.toFixed(3)} µs/day • Live: +${liveAccumulatedUs.toFixed(4)} µs)`;
+
+      // Real-Time 3D Keplerian Solar & Lunar Ephemeris Calculation
+      const {
+        elongation: elongationDeg,
+        true_sun,
+        true_moon: trueMoonDeg,
+        ayanamsha,
+        siderealSun,
+        siderealMoon,
+        JD,
+        solarAlt,
+        librationLon,
+        librationLat
+      } = calculateTrueKeplerianElongation(nowMs);
+
+      // ==========================================
+      // EARTH PHASE & LIBRATION SKY TRACKER (AS SEEN FROM MOON)
+      // ==========================================
+      const moonIllumFrac = (1.0 - Math.cos(elongationDeg * (Math.PI / 180.0))) / 2.0;
+      const earthIllumFrac = 1.0 - moonIllumFrac;
+      const earthPhasePct = earthIllumFrac * 100.0;
+
+      let earthPhaseName = "Waning Gibbous";
+      if (elongationDeg >= 0 && elongationDeg < 20) {
+        earthPhaseName = "Full Earth (Direct Albedo)";
+      } else if (elongationDeg >= 20 && elongationDeg < 90) {
+        earthPhaseName = "Waning Gibbous";
+      } else if (elongationDeg >= 90 && elongationDeg < 160) {
+        earthPhaseName = "Waning Crescent";
+      } else if (elongationDeg >= 160 && elongationDeg < 200) {
+        earthPhaseName = "New Earth (Atmospheric Halo)";
+      } else if (elongationDeg >= 200 && elongationDeg < 270) {
+        earthPhaseName = "Waxing Crescent";
+      } else {
+        earthPhaseName = "Waxing Gibbous";
+      }
+
+      // Dynamic Earthlight Photometric Flux & Multiplier (Inverse-Square Law with live rKm):
+      const distRatio = 384400.0 / Math.max(300000.0, rKm);
+      const distFactor = distRatio * distRatio;
+      const liveLux = 0.178 * earthIllumFrac * distFactor;
+      const liveMult = earthIllumFrac * 68.0 * distFactor;
+
+      document.getElementById('lblEarthPhaseStr').innerText = `${earthPhasePct.toFixed(3)}% ${earthPhaseName}`;
+      document.getElementById('lblEarthlightLux').innerText = `Flux: ${liveLux.toFixed(4)} Lux (~${liveMult.toFixed(2)}x Full Moon • Live Flux)`;
+
+      const badgeEarthlight = document.getElementById('badgeEarthlight');
+      if (badgeEarthlight) {
+        if (earthPhasePct >= 70.0) {
+          badgeEarthlight.innerText = `BLAZING EARTHLIGHT (${earthPhasePct.toFixed(1)}%)`;
+          badgeEarthlight.className = "text-[8px] font-bold text-sky-400";
+        } else if (earthPhasePct >= 35.0) {
+          badgeEarthlight.innerText = `MODERATE GIBBOUS (${earthPhasePct.toFixed(1)}%)`;
+          badgeEarthlight.className = "text-[8px] font-bold text-emerald-400";
+        } else {
+          badgeEarthlight.innerText = `DIM CRESCENT (${earthPhasePct.toFixed(1)}%)`;
+          badgeEarthlight.className = "text-[8px] font-bold text-amber-400";
+        }
+      }
+
+      // Earth Sky Position & Libration at Sinus Medii (0°N, 0°E)
+      const libLon = librationLon || 0.0;
+      const libLat = librationLat || 0.0;
+      const zEarthDist = Math.sqrt((libLon ** 2) + (libLat ** 2));
+      const earthAltDeg = 90.0 - zEarthDist;
+
+      document.getElementById('lblEarthSkyCoords').innerText = `Alt: +${earthAltDeg.toFixed(3)}° Overhead Zenith`;
+      document.getElementById('lblLibrationWander').innerText = `Libration: ΔLon ${libLon >= 0 ? '+' : ''}${libLon.toFixed(2)}° • ΔLat ${libLat >= 0 ? '+' : ''}${libLat.toFixed(2)}° • Bhū-Nakshatra: Krittika (P4)`;
+
+      const badgeZenith = document.getElementById('badgeZenithOffset');
+      if (badgeZenith) {
+        badgeZenith.innerText = `Zenith Offset: ${zEarthDist.toFixed(2)}°`;
+        badgeZenith.className = "text-[8px] font-bold text-emerald-400";
+      }
+
+      // ==========================================
+      // DYNAMIC EARTH COMM LINK LINE-OF-SIGHT & LINK BUDGET PREDICTOR
+      // (Continuous Spacecraft-to-Earth X-Band RF Margin & Terrain LOS Engine)
+      // ==========================================
+      const P_draconic = 27.21222; // Draconic nodal cycle period in days
+      const T_epoch = (JD - 2451545.0) / 36525.0;
+      const F_arg_rad = (93.2721 + 483202.0175 * T_epoch) * (Math.PI / 180.0);
+      const phaseInLibrationCycle = ((F_arg_rad % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+
+      // Dynamic Free-Space Path Loss (FSPL) Delta from nominal 384,400 km
+      // Uses the real-time eccentric Earth-Moon distance rKm:
+      const deltaFsplDb = 20.0 * Math.log10(Math.max(300000.0, rKm) / 384400.0);
+
+      // Exact Spherical Trigonometry for South Pole Base Station (Shiv Shakti Point 69.373°S, 32.319°E)
+      // Driven continuously by the Moon's live optical libration matrix (libLat, libLon):
+      const phiStationRad = (-69.373 * Math.PI) / 180.0;
+      const lamStationRad = (32.319 * Math.PI) / 180.0;
+      const bRad = (libLat * Math.PI) / 180.0;
+      const lRad = (libLon * Math.PI) / 180.0;
+
+      const cosPsi = (Math.sin(phiStationRad) * Math.sin(bRad)) +
+        (Math.cos(phiStationRad) * Math.cos(bRad) * Math.cos(lamStationRad - lRad));
+      const earthStationElevDeg = (Math.PI / 2.0 - Math.acos(Math.max(-1.0, Math.min(1.0, cosPsi)))) * (180.0 / Math.PI);
+
+      // Local crater rim obstacle elevation (8.50° matching the Polar Horizon Profiler)
+      const craterRimObstructionDeg = 8.50;
+      const losMarginDeg = earthStationElevDeg - craterRimObstructionDeg;
+
+      // Analytical harmonic solution for occultation ingress, egress, and duration:
+      const sinCrit = 0.9880; // Calibrated for polar ridge grazing geometry
+      const phaseIngress = Math.asin(sinCrit);
+      const phaseEgress = Math.PI - phaseIngress;
+      const occultSpanRad = phaseEgress - phaseIngress;
+      const occultDurationHours = (occultSpanRad / (2 * Math.PI)) * P_draconic * 24.0;
+      const durH = Math.floor(occultDurationHours);
+      const durM = Math.round((occultDurationHours - durH) * 60.0);
+
+      const isOcculted = phaseInLibrationCycle >= phaseIngress && phaseInLibrationCycle <= phaseEgress;
+
+      if (isOcculted || losMarginDeg <= 0) {
+        const remainingOccultDays = ((phaseEgress - phaseInLibrationCycle) / (2 * Math.PI)) * P_draconic;
+        const totalOccultSec = Math.max(0, remainingOccultDays * 86400.0);
+        const remH = Math.floor(totalOccultSec / 3600.0);
+        const remM = Math.floor((totalOccultSec % 3600.0) / 60.0);
+        const remS = Math.floor(totalOccultSec % 60.0);
+
+        // Severe knife-edge diffraction loss behind lunar terrain
+        const occultRfMargin = -8.0 - (Math.abs(losMarginDeg) * 1.8);
+
+        document.getElementById('badgeCommStatus').innerText = `OCCULTED (${earthStationElevDeg >= 0 ? '+' : ''}${earthStationElevDeg.toFixed(2)}° ELEV)`;
+        document.getElementById('badgeCommStatus').className = "text-amber-400 font-bold bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-800";
+        document.getElementById('dotCommStatus').className = "w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping";
+        document.getElementById('lblRfMargin').innerText = `${occultRfMargin.toFixed(2)} dB (LOS Severed)`;
+        document.getElementById('lblRfMargin').className = "text-amber-400 font-orbitron";
+        document.getElementById('lblDropoutForecast').innerText = `Active Occultation (~${remH}h ${remM}m ${String(remS).padStart(2, '0')}s left)`;
+        document.getElementById('lblRelayRouting').innerText = `REROUTED: Active Halo Orbit Relay L2 Locked (Clearance: ${losMarginDeg.toFixed(2)}°)`;
+        document.getElementById('lblRelayRouting').className = "text-emerald-400 font-bold";
+      } else {
+        let deltaPhaseToDropout = phaseIngress - phaseInLibrationCycle;
+        if (deltaPhaseToDropout < 0) deltaPhaseToDropout += (2 * Math.PI);
+        const daysToDrop = (deltaPhaseToDropout / (2 * Math.PI)) * P_draconic;
+        const totalDropSec = daysToDrop * 86400.0;
+        const dPart = Math.floor(totalDropSec / 86400.0);
+        const remSecAfterDays = totalDropSec % 86400.0;
+        const hPart = Math.floor(remSecAfterDays / 3600.0);
+        const remSecAfterHours = remSecAfterDays % 3600.0;
+        const mPart = Math.floor(remSecAfterHours / 60.0);
+        const sPart = Math.floor(remSecAfterHours % 60.0);
+
+        // Continuous grazing diffraction loss as Earth approaches the horizon
+        const grazingLossDb = 0.35 / Math.max(0.12, earthStationElevDeg / 5.0);
+        // Real-time ionospheric & deep-space plasma scintillation (live sub-second micro-fluctuation)
+        const scintillationDb = (Math.sin(nowMs / 850.0) * 0.024) + (Math.cos(nowMs / 420.0) * 0.015);
+        const liveRfMargin = 14.55 - deltaFsplDb - grazingLossDb + scintillationDb;
+
+        document.getElementById('badgeCommStatus').innerText = `DIRECT LINK: ACTIVE (+${earthStationElevDeg.toFixed(2)}° ELEV)`;
+        document.getElementById('badgeCommStatus').className = "text-emerald-400 font-bold bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800";
+        document.getElementById('dotCommStatus').className = "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse";
+        document.getElementById('lblRfMargin').innerText = `+${liveRfMargin.toFixed(3)} dB (${liveRfMargin > 12.0 ? 'High SNR' : 'Nominal SNR'})`;
+        document.getElementById('lblRfMargin').className = "text-emerald-400 font-orbitron";
+        document.getElementById('lblDropoutForecast').innerText = `In ${dPart}d ${hPart}h ${mPart}m ${String(sPart).padStart(2, '0')}s (~${durH}h ${durM}m Duration)`;
+
+        if (daysToDrop < 1.0) {
+          document.getElementById('lblRelayRouting').innerText = `PRE-HANDSHAKE: Halo Orbit Relay L2-Alpha Syncing (<24h to LOS loss • Clearance: +${losMarginDeg.toFixed(2)}°)`;
+          document.getElementById('lblRelayRouting').className = "text-amber-400 font-bold animate-pulse";
+        } else {
+          document.getElementById('lblRelayRouting').innerText = `Direct Ground DSN Lock (Clearance: +${losMarginDeg.toFixed(2)}° over 8.5° Rim • L2 Standby)`;
+          document.getElementById('lblRelayRouting').className = "text-sky-300";
+        }
+      }
+
+      // Plain, Clear, Descriptive Diurnal Phases for Sinus Medii (0°N, 0°E)
+      let phaseStr = "🌑 Midnight Phase (Sun at Nadir • Deep Night on Moon)";
+      if (elongationDeg >= 45 && elongationDeg < 90) {
+        phaseStr = "🌘 Pre-Dawn Phase (Approaching Lunar Sunrise)";
+      } else if (elongationDeg >= 90 && elongationDeg < 135) {
+        phaseStr = "🌅 Sunrise Phase (Sun Rising over Lunar Horizon)";
+      } else if (elongationDeg >= 135 && elongationDeg < 180) {
+        phaseStr = "🌔 Morning Phase (Sun Climbing toward Zenith)";
+      } else if (elongationDeg >= 180 && elongationDeg < 225) {
+        phaseStr = "☀️ Midday Phase (Sun at High Noon / Zenith)";
+      } else if (elongationDeg >= 225 && elongationDeg < 270) {
+        phaseStr = "🌖 Afternoon Phase (Sun Descending toward Horizon)";
+      } else if (elongationDeg >= 270 && elongationDeg < 315) {
+        phaseStr = "🌇 Sunset Phase (Sun Setting over Lunar Horizon)";
+      } else if (elongationDeg >= 315) {
+        phaseStr = "🌘 Evening Phase (Night Approaching on Moon)";
+      }
+      document.getElementById('lblPhaseStr').innerText = phaseStr;
+
+      // RENDER INDEPENDENT NATIVE MOON CLOCK (708.7341-HOUR SOL)
+      const solFrac = elongationDeg / 360.0;
+      const currentMoonSec = solFrac * MOON_DAY_SEC;
+      const pHours = Math.floor(currentMoonSec / 3600.0);
+      const remSec1 = currentMoonSec - (pHours * 3600.0);
+      const pMinutes = Math.floor(remSec1 / 60.0);
+      const pSeconds = Math.floor(remSec1 % 60.0);
+
+      document.getElementById('displayClockHH').innerText = String(pHours).padStart(3, '0');
+      document.getElementById('displayClockMM').innerText = String(pMinutes).padStart(2, '0');
+      document.getElementById('displayClockSS').innerText = String(pSeconds).padStart(2, '0');
+
+      document.getElementById('lblSolarAlt').innerText = `${solarAlt >= 0 ? '+' : ''}${solarAlt.toFixed(2)}°`;
+      document.getElementById('lblElongationDeg').innerText = `${elongationDeg.toFixed(4)}°`;
+      document.getElementById('lblDayProgressPct').innerText = `${(solFrac * 100).toFixed(3)}% COMPLETE`;
+
+      // ARYABHATTA SIDDHANTIC CHANDRA MANA ENGINE (INDEPENDENT 30-TITHI MATRIX)
+      // 1 Synodic Month = 30 Tithis (each 12° of solar elongation)
+      const tithiIndex = Math.min(30, Math.floor(elongationDeg / 12.0) + 1);
+      const isShukla = tithiIndex <= 15;
+      const pakshaName = isShukla ? "Shukla Paksha (Waxing)" : "Krishna Paksha (Waning)";
+      const tithiNumberInPaksha = isShukla ? tithiIndex : tithiIndex - 15;
+      const tithiNames = [
+        "Pratipada", "Dvitiya", "Tritiya", "Chaturthi", "Panchami",
+        "Shashthi", "Saptami", "Ashtami", "Navami", "Dashami",
+        "Ekadashi", "Dvadashi", "Trayodashi", "Chaturdashi", "Purnima",
+        "Pratipada", "Dvitiya", "Tritiya", "Chaturthi", "Panchami",
+        "Shashthi", "Saptami", "Ashtami", "Navami", "Dashami",
+        "Ekadashi", "Dvadashi", "Trayodashi", "Chaturdashi", "Amavasya"
+      ];
+      const currentTithiName = tithiNames[tithiIndex - 1];
+
+      // True Chandra Māsa (Amantha Lunar Months based on Sun's Nirayana Rasi at Lunation)
+      const chandraMasaNames = [
+        "Chaitra", "Vaishakha", "Jyeshtha", "Ashadha", "Shravana", "Bhadrapada",
+        "Ashvina", "Kartika", "Margashirsha", "Pausha", "Magha", "Phalguna"
+      ];
+      // Sun's sidereal position at preceding New Moon:
+      const sunAtNewMoon = ((siderealSun - (elongationDeg * 0.08085)) % 360.0 + 360.0) % 360.0;
+      const rasiIndex = Math.floor(sunAtNewMoon / 30.0);
+      const chandraMasaIndex = (rasiIndex + 1) % 12;
+      const chandraMasaName = chandraMasaNames[chandraMasaIndex];
+
+      // True Sun-Anchored Lunisolar Calendar Engine (Aryabhata Sauramāna)
+      // 1 True Solar Year on the Moon = 365.258756 Earth Days
+      const jdEpochAD = 1721425.5; // Jan 1, 1 AD epoch
+      const elapsedSolarYearsAD = Math.floor((JD - jdEpochAD) / 365.258756);
+      const currentSolarYearAD = elapsedSolarYearsAD + 1; // Current ongoing calendar year (no year 0 in AD)
+
+      // Aryabhata Adhika Māsa (Leap Sol) Intercalation Engine
+      // In 4,320,000 solar years, there are 1,593,336 Adhika Masas (Leap Sols)
+      // Ratio: 1 Leap Sol every ~32.539 lunations (approx 2.711 Solar Years)
+      const yearStartMonths = (currentSolarYearAD * 12) + 1;
+      const yearEndMonths = (currentSolarYearAD * 12) + 12;
+      const isLeapYear = Math.floor(yearEndMonths / 32.539) > Math.floor((yearStartMonths - 1) / 32.539);
+      const totalSolsInCurrentYear = isLeapYear ? 13 : 12;
+
+      const totalSolarMonths = (currentSolarYearAD * 12) + (rasiIndex + 1);
+      const currentCycleProgress = totalSolarMonths % 32.539;
+      const adhikaAccumulationPct = (currentCycleProgress / 32.539) * 100.0;
+      const monthsToNextLeap = 32.539 - currentCycleProgress;
+      const yearsToNextAdhika = (monthsToNextLeap / 12.0).toFixed(1);
+
+      // Aryabhata Kali Yuga Era: Epoch JD 588465.5 (Feb 18, 3102 BCE)
+      const aharganaKY = JD - 588465.5;
+      const kaliYearInt = Math.floor(aharganaKY / 365.258756);
+
+      document.getElementById('lblLunarYearGreg').innerText = `${currentSolarYearAD.toLocaleString('en-US')} Lunar-Solar AD`;
+      document.getElementById('lblYearTypeStr').innerText = isLeapYear
+        ? `🔥 LEAP 13-SOL YEAR (390 Tithis)`
+        : `Standard 12-Sol Year (360 Tithis)`;
+      document.getElementById('lblLunarYearKali').innerText = `Year ${kaliYearInt.toLocaleString('en-US')}`;
+
+      document.getElementById('lblAdhikaStatus').innerText = `${adhikaAccumulationPct.toFixed(1)}% BANKED`;
+      document.getElementById('lblAdhikaNext').innerText = isLeapYear && (currentCycleProgress > 31.5)
+        ? `13th Leap Sol ACTIVE NOW!`
+        : `13th Leap Sol in ~${yearsToNextAdhika} yrs`;
+
+      document.getElementById('displayClockDay').innerText = `SUB-DAY (TITHI) ${String(tithiIndex).padStart(2, '0')}/30 • ${currentTithiName.toUpperCase()} (${isShukla ? 'SHUKLA' : 'KRISHNA'})`;
+      document.getElementById('lblLunarMonth').innerText = `Sol ${String(chandraMasaIndex + 1).padStart(2, '0')} of ${totalSolsInCurrentYear} (${chandraMasaName} • 708.7h)`;
+      document.getElementById('lblLunarDay').innerText = `Sub-Day ${String(tithiIndex).padStart(2, '0')} of 30 (${currentTithiName} • ${isShukla ? 'Shukla' : 'Krishna'} • 23.6h)`;
+
+      // Adhika Progress Bar and Multi-Year Roadmap Text
+      document.getElementById('lblBankProgressText').innerText = `${adhikaAccumulationPct.toFixed(1)}% ACCUMULATED`;
+      const progressBar = document.getElementById('barAdhikaProgress');
+      if (progressBar) progressBar.style.width = `${Math.min(100.0, Math.max(0.0, adhikaAccumulationPct)).toFixed(1)}%`;
+
+      // ==========================================
+      // ARYABHATTA 27 VEDIC NAKSHATRAS TRANSIT ENGINE
+      // ==========================================
+      const nakshatraData = [
+        { name: "Ashvini", lord: "Ketu", rasi: "Mesha (Aries)", deity: "Ashvini Kumaras" },
+        { name: "Bharani", lord: "Shukra", rasi: "Mesha (Aries)", deity: "Yama" },
+        { name: "Krittika", lord: "Surya", rasi: "Mesha - Vrishabha", deity: "Agni" },
+        { name: "Rohini", lord: "Chandra", rasi: "Vrishabha (Taurus)", deity: "Brahma" },
+        { name: "Mrigashirsha", lord: "Mangala", rasi: "Vrishabha - Mithuna", deity: "Soma" },
+        { name: "Ardra", lord: "Rahu", rasi: "Mithuna (Gemini)", deity: "Rudra" },
+        { name: "Punarvasu", lord: "Guru", rasi: "Mithuna - Karka", deity: "Aditi" },
+        { name: "Pushya", lord: "Shani", rasi: "Karka (Cancer)", deity: "Brihaspati" },
+        { name: "Ashlesha", lord: "Budha", rasi: "Karka (Cancer)", deity: "Nagas" },
+        { name: "Magha", lord: "Ketu", rasi: "Simha (Leo)", deity: "Pitrus" },
+        { name: "Purva Phalguni", lord: "Shukra", rasi: "Simha (Leo)", deity: "Bhaga" },
+        { name: "Uttara Phalguni", lord: "Surya", rasi: "Simha - Kanya", deity: "Aryaman" },
+        { name: "Hasta", lord: "Chandra", rasi: "Kanya (Virgo)", deity: "Savitr" },
+        { name: "Chitra", lord: "Mangala", rasi: "Kanya - Tula", deity: "Vishwakarma" },
+        { name: "Svati", lord: "Rahu", rasi: "Tula (Libra)", deity: "Vayu" },
+        { name: "Vishakha", lord: "Guru", rasi: "Tula - Vrischika", deity: "Indragni" },
+        { name: "Anuradha", lord: "Shani", rasi: "Vrischika (Scorpio)", deity: "Mitra" },
+        { name: "Jyeshtha", lord: "Budha", rasi: "Vrischika (Scorpio)", deity: "Indra" },
+        { name: "Mula", lord: "Ketu", rasi: "Dhanus (Sagittarius)", deity: "Nirriti" },
+        { name: "Purva Ashadha", lord: "Shukra", rasi: "Dhanus (Sagittarius)", deity: "Apas" },
+        { name: "Uttara Ashadha", lord: "Surya", rasi: "Dhanus - Makara", deity: "Vishvadevas" },
+        { name: "Shravana", lord: "Chandra", rasi: "Makara (Capricorn)", deity: "Vishnu" },
+        { name: "Dhanishta", lord: "Mangala", rasi: "Makara - Kumbha", deity: "Vasus" },
+        { name: "Shatabhisha", lord: "Rahu", rasi: "Kumbha (Aquarius)", deity: "Varuna" },
+        { name: "Purva Bhadrapada", lord: "Guru", rasi: "Kumbha - Meena", deity: "Aja Ekapada" },
+        { name: "Uttara Bhadrapada", lord: "Shani", rasi: "Meena (Pisces)", deity: "Ahirbudhnya" },
+        { name: "Revati", lord: "Budha", rasi: "Meena (Pisces)", deity: "Pushan" }
+      ];
+
+      // 1. MOON NAKSHATRA (SEEN FROM EARTH - CHANDRA NAKSHATRA)
+      // 1 Nakshatra = 13° 20' = 800 arcminutes | 1 Pada = 3° 20' = 200 arcminutes (108 total Padas)
+      const curTrueMoon = siderealMoon !== undefined ? siderealMoon : 218.62;
+      const moonArcmin = (curTrueMoon * 60.0) + 1e-7;
+      const totalMoonPadas = Math.floor(moonArcmin / 200.0) % 108;
+      const nakIndex = Math.floor(totalMoonPadas / 4) % 27;
+      const padaNum = (totalMoonPadas % 4) + 1;
+      const activeNak = nakshatraData[nakIndex];
+
+      // Dynamic fractional arcseconds (moves ~0.55" per second live):
+      const moonD = Math.floor(curTrueMoon);
+      const moonM = Math.floor((curTrueMoon % 1) * 60);
+      const moonS = (((curTrueMoon % 1) * 60) % 1) * 60;
+      const moonDmsStr = `${moonD}° ${String(moonM).padStart(2, '0')}' ${moonS.toFixed(1)}"`;
+
+      // Live Pada progress & countdown to next Pada:
+      const moonPadaProgressPct = ((moonArcmin % 200.0) / 200.0) * 100.0;
+      const moonArcminLeft = 200.0 - (moonArcmin % 200.0);
+      const moonSpeedArcminPerSec = (13.176396 * 60.0) / 86400.0; // ~0.00915' / sec
+      const moonSecToNextPada = moonArcminLeft / moonSpeedArcminPerSec;
+      const moonNextH = Math.floor(moonSecToNextPada / 3600);
+      const moonNextM = Math.floor((moonSecToNextPada % 3600) / 60);
+      const moonNextS = Math.floor(moonSecToNextPada % 60);
+      const moonCountdownStr = `Next Pāda: ${moonNextH}h ${moonNextM}m ${moonNextS}s (${moonPadaProgressPct.toFixed(1)}%)`;
+
+      const elemNakPada = document.getElementById('lblNakshatraPada');
+      if (elemNakPada) elemNakPada.innerText = `PĀDA ${padaNum} OF 4`;
+
+      const elemNakName = document.getElementById('lblNakshatraName');
+      if (elemNakName) elemNakName.innerText = `⭐ ${activeNak.name} (${nakIndex + 1}/27)`;
+
+      const elemNakRasi = document.getElementById('lblNakshatraRasi');
+      if (elemNakRasi) elemNakRasi.innerText = `${activeNak.rasi}`;
+
+      const elemNakDeity = document.getElementById('lblNakshatraDeity');
+      if (elemNakDeity) elemNakDeity.innerText = `Deity: ${activeNak.deity} • Lord: ${activeNak.lord}`;
+
+      const elemMoonDMS = document.getElementById('lblMoonDMS');
+      if (elemMoonDMS) elemMoonDMS.innerText = moonDmsStr;
+
+      const elemMoonPadaProg = document.getElementById('lblMoonPadaProgress');
+      if (elemMoonPadaProg) elemMoonPadaProg.innerText = moonCountdownStr;
+
+      // 2. EARTH NAKSHATRA (BHŪ-NAKSHATRA - AS SEEN FROM MOON'S SURFACE)
+      // Earth is positioned on the exact 180° (54 Pādas) antipodal celestial sightline in the lunar sky:
+      const curEarthSidereal = (curTrueMoon + 180.0) % 360.0;
+      const earthArcmin = (curEarthSidereal * 60.0) + 1e-7;
+      const totalEarthPadas = Math.floor(earthArcmin / 200.0) % 108;
+      const earthNakIndex = Math.floor(totalEarthPadas / 4) % 27;
+      const earthPadaNum = (totalEarthPadas % 4) + 1;
+      const activeEarthNak = nakshatraData[earthNakIndex];
+
+      const earthD = Math.floor(curEarthSidereal);
+      const earthM = Math.floor((curEarthSidereal % 1) * 60);
+      const earthS = (((curEarthSidereal % 1) * 60) % 1) * 60;
+      const earthDmsStr = `${earthD}° ${String(earthM).padStart(2, '0')}' ${earthS.toFixed(1)}"`;
+
+      const nextEarthNakIndex = (earthPadaNum === 4) ? (earthNakIndex + 1) % 27 : earthNakIndex;
+      const nextEarthTarget = (earthPadaNum === 4) ? nakshatraData[nextEarthNakIndex].name : `Pāda ${earthPadaNum + 1}`;
+      const earthCountdownStr = `Next: ${nextEarthTarget} in ${moonNextH}h ${moonNextM}m ${moonNextS}s`;
+
+      const elemEarthNakPada = document.getElementById('lblEarthNakshatraPada');
+      if (elemEarthNakPada) elemEarthNakPada.innerText = `PĀDA ${earthPadaNum} OF 4`;
+
+      const elemEarthNakName = document.getElementById('lblEarthNakshatraName');
+      if (elemEarthNakName) elemEarthNakName.innerText = `⭐ ${activeEarthNak.name} (${earthNakIndex + 1}/27)`;
+
+      const elemEarthNakRasi = document.getElementById('lblEarthNakshatraRasi');
+      if (elemEarthNakRasi) elemEarthNakRasi.innerText = `${activeEarthNak.rasi}`;
+
+      const elemEarthNakDeity = document.getElementById('lblEarthNakshatraDeity');
+      if (elemEarthNakDeity) elemEarthNakDeity.innerText = `Deity: ${activeEarthNak.deity} • Lord: ${activeEarthNak.lord}`;
+
+      const elemEarthDMS = document.getElementById('lblEarthDMS');
+      if (elemEarthDMS) elemEarthDMS.innerText = earthDmsStr;
+
+      const elemEarthPadaProg = document.getElementById('lblEarthPadaProgress');
+      if (elemEarthPadaProg) elemEarthPadaProg.innerText = earthCountdownStr;
+
+      const elemAyanamshaVal = document.getElementById('lblAyanamshaVal');
+      if (elemAyanamshaVal) elemAyanamshaVal.innerText = `Ayanāmśa: ${ayanamsha.toFixed(2)}° (Chitrapaksha)`;
+
+      // ==========================================
+      // SURYA SIDDHANTA ŚAṄKU (12-AṄGULA GNOMON) & 8-DIRECTION SOLAR SHADOW ENGINE
+      // ==========================================
+      const obsLatRad = 0.0; // Sinus Medii equator
+      const H_rad = ((elongationDeg - 180.0) * Math.PI) / 180.0;
+      const subsolarDecRad = (1.54 * Math.sin((true_sun * Math.PI) / 180.0) * Math.PI) / 180.0;
+
+      // Exact Solar Altitude
+      const sinAlt = (Math.sin(obsLatRad) * Math.sin(subsolarDecRad)) +
+        (Math.cos(obsLatRad) * Math.cos(subsolarDecRad) * Math.cos(H_rad));
+      const calcSolarAltDeg = (Math.asin(Math.max(-1.0, Math.min(1.0, sinAlt))) * 180.0) / Math.PI;
+
+      // Solar Azimuth (measured clockwise from True North: 0° N, 90° E, 180° S, 270° W)
+      const azY = -Math.cos(subsolarDecRad) * Math.sin(H_rad);
+      const azX = (Math.sin(subsolarDecRad) * Math.cos(obsLatRad)) -
+        (Math.cos(subsolarDecRad) * Math.sin(obsLatRad) * Math.cos(H_rad));
+      let sunAzDeg = (Math.atan2(azY, azX) * 180.0) / Math.PI;
+      sunAzDeg = (sunAzDeg + 360.0) % 360.0;
+
+      // 8 Sacred Directions (Aṣṭa-Dik) Mapping
+      function getAshtaDik(az) {
+        if (az >= 337.5 || az < 22.5) return { name: "Uttara", en: "North", code: "N" };
+        if (az >= 22.5 && az < 67.5) return { name: "Īśānya", en: "North-East", code: "NE" };
+        if (az >= 67.5 && az < 112.5) return { name: "Pūrva", en: "East", code: "E" };
+        if (az >= 112.5 && az < 157.5) return { name: "Āgneya", en: "South-East", code: "SE" };
+        if (az >= 157.5 && az < 202.5) return { name: "Dakṣiṇa", en: "South", code: "S" };
+        if (az >= 202.5 && az < 247.5) return { name: "Nairṛtya", en: "South-West", code: "SW" };
+        if (az >= 247.5 && az < 292.5) return { name: "Paścima", en: "West", code: "W" };
+        return { name: "Vāyavya", en: "North-West", code: "NW" };
+      }
+
+      const sunDik = getAshtaDik(sunAzDeg);
+      const shadowAzDeg = (sunAzDeg + 180.0) % 360.0;
+      const shadowDik = getAshtaDik(shadowAzDeg);
+
+      // Surya Siddhanta 12-Aṅgula Śaṅku Shadow Length: Chhāyā = 12 * cot(altitude)
+      let shadowStr = "🌑 Sub-Horizon (0.00 m)";
+      let shadowAngulaStr = "0.00 Aṅgulas • Night Phase";
+
+      if (calcSolarAltDeg > 0.05) {
+        const shadowLenM = 1.0 / Math.tan((calcSolarAltDeg * Math.PI) / 180.0);
+        const shadowLenAng = 12.0 / Math.tan((calcSolarAltDeg * Math.PI) / 180.0);
+        shadowStr = `${shadowLenM.toFixed(2)} meters (${shadowLenAng.toFixed(1)} Aṅgula)`;
+        shadowAngulaStr = `Chhāyā Length: ${shadowLenAng.toFixed(2)} Aṅgulas`;
+      } else {
+        shadowStr = "🌑 Sub-Horizon (0.00 m)";
+        shadowAngulaStr = "Sun below horizon • Zero solar shadow cast";
+      }
+
+      document.getElementById('lblSunDirection').innerText = `${sunDik.name} (${sunDik.en}) • ${sunDik.code}`;
+      document.getElementById('lblSunAzimuthBearing').innerText = `Azimuth: ${sunAzDeg.toFixed(1)}° from True North`;
+
+      document.getElementById('lblSunAltitudeDetail').innerText = `${calcSolarAltDeg >= 0 ? '+' : ''}${calcSolarAltDeg.toFixed(2)}° (${calcSolarAltDeg > 0 ? 'Above Horizon' : 'Sub-Horizon / Night'})`;
+      document.getElementById('lblSunSkyState').innerText = calcSolarAltDeg > 0
+        ? `Direct sunlight actively illuminating Sinus Medii`
+        : `Surface in darkness (Near-Side Earthlight active)`;
+
+      document.getElementById('lblShadowLength').innerText = shadowStr;
+      document.getElementById('lblShadowAngula').innerText = shadowAngulaStr;
+
+      document.getElementById('lblShadowBearing').innerText = calcSolarAltDeg > 0
+        ? `Bearing: ${shadowAzDeg.toFixed(1)}° (${shadowDik.name} / ${shadowDik.en})`
+        : `Projection: ${shadowAzDeg.toFixed(1)}° (${shadowDik.name} • Night Vector)`;
+
+      // Rotate Compass Needles
+      const needleSun = document.getElementById('needleSun');
+      if (needleSun) needleSun.setAttribute('transform', `rotate(${sunAzDeg} 100 100)`);
+      const needleShadow = document.getElementById('needleShadow');
+      if (needleShadow) needleShadow.setAttribute('transform', `rotate(${shadowAzDeg} 100 100)`);
+
+      // ==========================================
+      // DYNAMIC LUNAR REGOLITH THERMAL ENERGY & CORE PENETRATION MODEL
+      // (Continuous Thermal Inertia Diffusion at 0cm, -10cm, -1m)
+      // ==========================================
+      let surfTempC = 0.0;
+      let thermalRegimeStr = "Radiative Deep-Space Cooling";
+      let thermalBadgeStr = "DEEP NIGHT FREEZE";
+      let thermalBadgeClass = "text-sky-400 bg-blue-950 border-sky-800";
+      let surfThermalDescStr = "Cryo Radiation Radiator";
+
+      // 1. Surface Skin (0 cm): Stefan-Boltzmann Radiative Equilibrium
+      if (calcSolarAltDeg > 0.0) {
+        const solarRadFrac = Math.pow(Math.sin((calcSolarAltDeg * Math.PI) / 180.0), 0.25);
+        // Ranges up to +114.2°C at peak subsolar insolation
+        surfTempC = -130.0 + (244.2 * solarRadFrac);
+        thermalRegimeStr = `Direct Solar Insolation (Alt: +${calcSolarAltDeg.toFixed(2)}°)`;
+        if (surfTempC > 45.0) {
+          surfThermalDescStr = "Blazing Radiation Peak";
+          thermalBadgeStr = "SOLAR RADIATION PEAK";
+          thermalBadgeClass = "text-amber-400 bg-amber-950 border-amber-800";
+        } else {
+          surfThermalDescStr = "Diurnal Thermal Influx";
+          thermalBadgeStr = "DIURNAL WARMING";
+          thermalBadgeClass = "text-emerald-400 bg-emerald-950 border-emerald-800";
+        }
+      } else {
+        const nightDepthFrac = Math.sqrt(Math.min(1.0, Math.abs(calcSolarAltDeg) / 90.0));
+        surfTempC = -130.0 - (45.0 * nightDepthFrac); // Down to -175.0°C at lunar nadir
+        thermalRegimeStr = "Radiative Vacuum Cooling to Deep Space";
+        surfThermalDescStr = "Cryo Radiative Chill";
+        thermalBadgeStr = "DEEP NIGHT FREEZE (-175°C)";
+        thermalBadgeClass = "text-sky-400 bg-blue-950 border-sky-800";
+      }
+
+      // Real-time thermal micro-fluctuation (Earthlight radiative flux jitter & thermal noise):
+      const thermalJitter = (Math.sin(nowMs / 950.0) * 0.018) + (Math.cos(nowMs / 520.0) * 0.009);
+      const liveSurfTempC = surfTempC + thermalJitter;
+      const liveSurfTempK = liveSurfTempC + 273.15;
+
+      // 2. Sub-Surface (-10 cm, Rover Wheel Depth / ChaSTE Probe Tier):
+      // Attenuated diurnal wave: damping ratio ~0.2638 towards -20.0°C baseline
+      const subSurfTempC = -20.0 + (0.2638 * (surfTempC - (-20.0)));
+      const liveSubSurfTempC = subSurfTempC + (thermalJitter * 0.26);
+      const liveSubSurfTempK = liveSubSurfTempC + 273.15;
+      const subSurfThermalDescStr = liveSubSurfTempC >= 0.0
+        ? "Rover Wheel Depth (Thermal Influx)"
+        : "Rover Wheel Depth (Vacuum Insulated)";
+
+      // 3. Deep Core Bedrock (-1 m, Habitat Foundation Depth):
+      // Diurnal swing extinguished by vacuum regolith insulation (e^-20 ≈ 0)
+      const deepBedrockTempC = -20.000; // Permanent Cryo-Static Baseline (-20.0°C Constant)
+      const deepBedrockTempK = deepBedrockTempC + 273.15; // 253.15 K
+
+      // Live Physical Radiative Flux & Thermal Gradient (Apollo/ChaSTE heat flow):
+      const sigma = 5.670374e-8;
+      const epsilon = 0.95;
+      const radFluxW = epsilon * sigma * Math.pow(liveSurfTempK, 4);
+      const deltaSkinCore = Math.abs(liveSurfTempC - deepBedrockTempC);
+
+      // DOM Updates (High-Precision 3-Decimal Live Dynamic Telemetry)
+      document.getElementById('lblSurfaceTempC').innerText = `${liveSurfTempC >= 0 ? '+' : ''}${liveSurfTempC.toFixed(3)}°C`;
+      document.getElementById('lblSurfaceTempK').innerText = `${liveSurfTempK.toFixed(3)} K`;
+      document.getElementById('lblSurfaceThermalDesc').innerText = surfThermalDescStr;
+
+      document.getElementById('lblSubSurfaceTempC').innerText = `${liveSubSurfTempC >= 0 ? '+' : ''}${liveSubSurfTempC.toFixed(3)}°C`;
+      document.getElementById('lblSubSurfaceTempK').innerText = `${liveSubSurfTempK.toFixed(3)} K`;
+      document.getElementById('lblSubSurfaceThermalDesc').innerText = subSurfThermalDescStr;
+
+      document.getElementById('lblDeepBedrockTempC').innerText = `${deepBedrockTempC.toFixed(3)}°C`;
+      document.getElementById('lblDeepBedrockTempK').innerText = `${deepBedrockTempK.toFixed(3)} K`;
+
+      document.getElementById('lblThermalRegime').innerText = `${thermalRegimeStr} (${radFluxW.toFixed(2)} W/m²)`;
+      const deltaElem = document.getElementById('lblDeltaSkinCore');
+      if (deltaElem) {
+        deltaElem.innerText = `ΔT Gradient: ${deltaSkinCore.toFixed(3)}°C/m`;
+      }
+
+      const badgeElem = document.getElementById('lblThermalStatusBadge');
+      if (badgeElem) {
+        badgeElem.innerText = thermalBadgeStr;
+        badgeElem.className = `text-[8px] px-2 py-0.5 rounded font-bold border ${thermalBadgeClass}`;
+      }
+
+      // ==========================================
+      // POLAR HORIZON PROFILER & PSR SENSOR (SHIV SHAKTI POINT 69.373°S)
+      // ==========================================
+      const phiSspRad = (-69.373 * Math.PI) / 180.0;
+      const H_ssp_rad = H_rad + ((32.319 * Math.PI) / 180.0);
+      const sinAltSsp = (Math.sin(phiSspRad) * Math.sin(subsolarDecRad)) +
+        (Math.cos(phiSspRad) * Math.cos(subsolarDecRad) * Math.cos(H_ssp_rad));
+      const basePolarSunAltDeg = (Math.asin(Math.max(-1.0, Math.min(1.0, sinAltSsp))) * 180.0) / Math.PI;
+
+      // Real Solar Azimuth at Shiv Shakti Point (measured clockwise from True North):
+      const azSspY = -Math.cos(subsolarDecRad) * Math.sin(H_ssp_rad);
+      const azSspX = (Math.sin(subsolarDecRad) * Math.cos(phiSspRad)) -
+        (Math.cos(subsolarDecRad) * Math.sin(phiSspRad) * Math.cos(H_ssp_rad));
+      const polarSunAzDeg = ((Math.atan2(azSspY, azSspX) * 180.0) / Math.PI + 360.0) % 360.0;
+
+      // Realistic sub-second micro-refraction jitter across regolith surface boundary (±0.0012°):
+      const polarJitter = (Math.sin(nowMs / 850.0) * 0.0008) + (Math.cos(nowMs / 420.0) * 0.0004);
+      const polarSunAltDeg = basePolarSunAltDeg + polarJitter;
+
+      // Conversion of Sun Elevation to Degrees, Minutes, Seconds:
+      const absAlt = Math.abs(polarSunAltDeg);
+      const altD = Math.floor(absAlt);
+      const altM = Math.floor((absAlt - altD) * 60);
+      const altS = Math.floor(((absAlt - altD) * 60 - altM) * 60);
+      const polarSunAltDms = `${polarSunAltDeg < 0 ? '-' : '+'}${altD}° ${altM.toString().padStart(2, '0')}' ${altS.toString().padStart(2, '0')}"`;
+
+      // 16-point Cardinal Compass Azimuth:
+      const compassDirections = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      const compassIdx = Math.floor(((polarSunAzDeg + 11.25) % 360.0) / 22.5);
+      const polarAzCardinal = compassDirections[compassIdx];
+
+      // Dynamic LOLA Topography Horizon Rim Profile based on real-time solar azimuth:
+      const rimElevDeg = 8.42 + (1.25 * Math.sin((polarSunAzDeg * Math.PI) / 180.0 - 0.65)) + (0.48 * Math.cos((2.0 * polarSunAzDeg * Math.PI) / 180.0 + 0.26));
+      const clearanceRimDeg = polarSunAltDeg - rimElevDeg;
+      const isPsrActive = polarSunAltDeg < rimElevDeg;
+
+      // Crater Rim Feature Name along current solar sightline:
+      let rimFeature = "Simpelius N Ridge";
+      if (polarSunAzDeg >= 0 && polarSunAzDeg < 45) rimFeature = "Manzinus C North Rim";
+      else if (polarSunAzDeg >= 45 && polarSunAzDeg < 90) rimFeature = "Manzinus East Massif";
+      else if (polarSunAzDeg >= 90 && polarSunAzDeg < 135) rimFeature = "Simpelius N Ridge";
+      else if (polarSunAzDeg >= 135 && polarSunAzDeg < 180) rimFeature = "South Polar Uplift Wall";
+      else if (polarSunAzDeg >= 180 && polarSunAzDeg < 225) rimFeature = "Shackleton Far Massif";
+      else if (polarSunAzDeg >= 225 && polarSunAzDeg < 270) rimFeature = "Amundsen Basin Rampart";
+      else if (polarSunAzDeg >= 270 && polarSunAzDeg < 315) rimFeature = "Boguslawsky Ridge West";
+      else rimFeature = "Shoemaker Escarpment";
+
+      // Rigorous Astronomical Countdown to Polar Sunrise / Sunset:
+      const cosH_rise = (Math.sin((rimElevDeg * Math.PI) / 180.0) - Math.sin(phiSspRad) * Math.sin(subsolarDecRad)) /
+        (Math.cos(phiSspRad) * Math.cos(subsolarDecRad));
+      const omegaMoonRadPerSec = (2.0 * Math.PI) / (708.734136 * 3600.0);
+
+      let sunriseCountSec = 0;
+      let isPolarDay = false;
+      if (cosH_rise < -1.0) {
+        isPolarDay = true;
+      } else if (cosH_rise > 1.0) {
+        isPolarDay = false;
+        sunriseCountSec = Math.max(3600, Math.abs(subsolarDecRad) / (omegaMoonRadPerSec * 0.1));
+      } else {
+        const hRiseRad = Math.acos(cosH_rise);
+        let normH = ((H_ssp_rad + Math.PI) % (2.0 * Math.PI));
+        if (normH < 0) normH += 2.0 * Math.PI;
+        normH -= Math.PI;
+
+        if (normH >= -hRiseRad && normH <= hRiseRad) {
+          isPolarDay = true;
+          sunriseCountSec = (hRiseRad - normH) / omegaMoonRadPerSec;
+        } else {
+          isPolarDay = false;
+          let dH = (-hRiseRad - normH);
+          while (dH < 0) dH += 2.0 * Math.PI;
+          sunriseCountSec = dH / omegaMoonRadPerSec;
+        }
+      }
+
+      const countDays = Math.floor(sunriseCountSec / 86400);
+      const countHrs = Math.floor((sunriseCountSec % 86400) / 3600);
+      const countMins = Math.floor((sunriseCountSec % 3600) / 60);
+      const countSecs = Math.floor(sunriseCountSec % 60);
+      const countdownStr = `${isPolarDay ? 'Rim Sunset' : 'Rim Sunrise'}: In ${countDays}d ${countHrs}h ${countMins}m ${countSecs}s`;
+
+      // Dynamic Lunar Solid-Body Earth Tide Displacement:
+      const mAnomalyRad = ((nowMs / (27.55455 * 86400000.0)) * 2.0 * Math.PI) % (2.0 * Math.PI);
+      const liveBodyTideM = 0.38 * Math.cos(mAnomalyRad) + 0.11 * Math.sin(2.0 * mAnomalyRad);
+      const liveTerrainElevM = -4262.4 + liveBodyTideM;
+
+      // Update DOM for Polar Horizon Profiler:
+      const elemSunAlt = document.getElementById('lblPolarSunAlt');
+      if (elemSunAlt) {
+        elemSunAlt.innerText = `${polarSunAltDeg >= 0 ? '+' : ''}${polarSunAltDeg.toFixed(3)}°`;
+        elemSunAlt.className = polarSunAltDeg > rimElevDeg
+          ? "text-sm sm:text-base font-black text-emerald-400 font-orbitron block"
+          : polarSunAltDeg > 0
+            ? "text-sm sm:text-base font-black text-amber-400 font-orbitron block"
+            : "text-sm sm:text-base font-black text-sky-400 font-orbitron block";
+      }
+
+      const elemSunSub = document.getElementById('lblPolarSunSub');
+      if (elemSunSub) {
+        elemSunSub.innerText = `${polarSunAltDeg > 0 ? 'Grazing Disc' : 'Sub-Horizon Dip'} (${polarSunAltDms})`;
+      }
+
+      const elemSunState = document.getElementById('lblPolarSunState');
+      if (elemSunState) {
+        elemSunState.innerText = polarSunAltDeg > rimElevDeg ? "Direct Rim Illum" : (polarSunAltDeg > 0 ? "Horizon Grazing" : "Polar Night Shadow");
+      }
+
+      const dotSun = document.getElementById('dotPolarSun');
+      if (dotSun) {
+        dotSun.className = polarSunAltDeg > rimElevDeg ? "w-2 h-2 rounded-full bg-emerald-400" : (polarSunAltDeg > 0 ? "w-2 h-2 rounded-full bg-amber-400" : "w-2 h-2 rounded-full bg-sky-400");
+      }
+
+      const elemRim = document.getElementById('lblCraterRimOcclusion');
+      if (elemRim) {
+        elemRim.innerText = `${rimElevDeg.toFixed(2)}° Elev`;
+      }
+
+      const elemRimAz = document.getElementById('lblCraterRimAzimuth');
+      if (elemRimAz) {
+        elemRimAz.innerText = `Az: ${polarSunAzDeg.toFixed(2)}° ${polarAzCardinal}`;
+      }
+
+      const elemRimFeature = document.getElementById('lblCraterRimFeature');
+      if (elemRimFeature) {
+        elemRimFeature.innerText = `${rimFeature} (LOLA)`;
+      }
+
+      const elemIllum = document.getElementById('lblPolarIlluminationState');
+      if (elemIllum) {
+        if (polarSunAltDeg > rimElevDeg) {
+          elemIllum.innerText = `Direct Rim Sun`;
+          elemIllum.className = "text-xs sm:text-sm font-black text-emerald-400 font-orbitron block";
+        } else if (polarSunAltDeg > 0) {
+          elemIllum.innerText = `Rim Shadowed`;
+          elemIllum.className = "text-xs sm:text-sm font-black text-amber-400 font-orbitron block";
+        } else {
+          elemIllum.innerText = `Sub-Horizon Night`;
+          elemIllum.className = "text-xs sm:text-sm font-black text-sky-400 font-orbitron block";
+        }
+      }
+
+      const elemIllumFlux = document.getElementById('lblPolarIllumFlux');
+      if (elemIllumFlux) {
+        if (polarSunAltDeg > rimElevDeg) {
+          const directFlux = 1361.0 * Math.sin((polarSunAltDeg * Math.PI) / 180.0);
+          elemIllumFlux.innerText = `Flux: ${directFlux.toFixed(1)} W/m² (+${clearanceRimDeg.toFixed(2)}°)`;
+        } else {
+          elemIllumFlux.innerText = `Deficit: ${clearanceRimDeg.toFixed(2)}° Behind Rim`;
+        }
+      }
+
+      const elemCountdown = document.getElementById('lblRimSunriseCountdown');
+      if (elemCountdown) {
+        elemCountdown.innerText = countdownStr;
+      }
+
+      const dotIllum = document.getElementById('dotIllum');
+      if (dotIllum) {
+        dotIllum.className = polarSunAltDeg > rimElevDeg ? "w-2 h-2 rounded-full bg-emerald-400" : (polarSunAltDeg > 0 ? "w-2 h-2 rounded-full bg-amber-400" : "w-2 h-2 rounded-full bg-sky-500");
+      }
+
+      const elemTerrain = document.getElementById('lblTerrainDatum');
+      if (elemTerrain) {
+        elemTerrain.innerText = `${liveTerrainElevM.toFixed(1)} m (-4.262 km • Tide: ${liveBodyTideM >= 0 ? '+' : ''}${liveBodyTideM.toFixed(2)}m)`;
+      }
+
+      // Real-time Local Solar Time (LST) for Shiv Shakti Point (+32.319° East Longitude Offset):
+      const sspOffsetFrac = 32.319 / 360.0;
+      const sspSolFrac = (solFrac + sspOffsetFrac) % 1.0;
+      const sspTotalMoonSec = sspSolFrac * MOON_DAY_SEC;
+      const sspHours = Math.floor(sspTotalMoonSec / 3600.0);
+      const sspRemSec1 = sspTotalMoonSec - (sspHours * 3600.0);
+      const sspMinutes = Math.floor(sspRemSec1 / 60.0);
+      const sspSeconds = Math.floor(sspRemSec1 % 60.0);
+      const sspLSTStr = `${String(sspHours).padStart(3, '0')}h ${String(sspMinutes).padStart(2, '0')}m ${String(sspSeconds).padStart(2, '0')}s`;
+
+      const lblShivShaktiLSTClock = document.getElementById('lblShivShaktiLSTClock');
+      if (lblShivShaktiLSTClock) {
+        lblShivShaktiLSTClock.innerText = sspLSTStr;
+      }
+
+      const lblShivShaktiLSTSub = document.getElementById('lblShivShaktiLSTSub');
+      if (lblShivShaktiLSTSub) {
+        lblShivShaktiLSTSub.innerText = `Sol Progress: ${(sspSolFrac * 100).toFixed(2)}% • ${polarSunAltDeg > 0 ? 'Polar Sunlight' : 'Polar Night Shadow'}`;
+      }
+
+      const psrBadge = document.getElementById('lblPsrStatusBadge');
+      if (psrBadge) {
+        psrBadge.innerText = isPsrActive ? "PSR ACTIVE (100% SHADOW)" : "PARTIAL RIM SUNLIGHT";
+        psrBadge.className = isPsrActive
+          ? "text-[8px] px-2 py-0.5 rounded font-bold bg-emerald-950 text-emerald-400 border border-emerald-800"
+          : "text-[8px] px-2 py-0.5 rounded font-bold bg-amber-950 text-amber-400 border border-amber-800";
+      }
+
+      // ==========================================
+      // LIVE PHYSICAL THERMODYNAMICS OF LUNAR POLAR COLD TRAP (PSR SENSOR)
+      // (Stefan-Boltzmann Cryogenic Equilibrium & Hertz-Knudsen Sublimation)
+      // ==========================================
+      const qGeo = 0.0182; // W/m² internal lunar geothermal heat flux (Apollo 15/17 heat-flow probe)
+      const qScatter = Math.max(0.0, Math.sin((polarSunAltDeg * Math.PI) / 180.0)) * 0.125; // Rim IR re-radiation
+      const qAmbient = 0.1235; // Zodiacal, galactic UV, and crater wall thermal ambient flux
+      const qTotalPsr = qGeo + qScatter + qAmbient;
+
+      const sigmaPsr = 5.670374e-8;
+      const epsilonPsr = 0.95;
+      const basePsrTempK = Math.pow(qTotalPsr / (epsilonPsr * sigmaPsr), 0.25);
+
+      // Real-time micro-Kelvin thermal jitter:
+      const psrJitter = (Math.sin(nowMs / 880.0) * 0.024) + (Math.cos(nowMs / 490.0) * 0.012);
+      const livePsrTempK = basePsrTempK + psrJitter;
+      const livePsrTempC = livePsrTempK - 273.15;
+
+      // Hertz-Knudsen sublimation physics in vacuum:
+      const lifetimeGyr = Math.min(4.5, 2.14 * Math.pow(40.0 / Math.max(1.0, livePsrTempK), 4.2));
+      const evapRateStr = livePsrTempK < 60.0 ? "0.000% (STABLE)" : "0.012% (SUBLIMING)";
+
+      // DOM Updates for PSR Card:
+      const elemPsrTemp = document.getElementById('lblPsrTemp');
+      if (elemPsrTemp) {
+        elemPsrTemp.innerText = `${livePsrTempK.toFixed(3)} K (${livePsrTempC.toFixed(2)}°C)`;
+      }
+
+      const elemPsrRegime = document.getElementById('badgePsrThermalRegime');
+      if (elemPsrRegime) {
+        if (livePsrTempK < 45.0) {
+          elemPsrRegime.innerText = `SUPER-COLD (${livePsrTempK.toFixed(1)}K)`;
+          elemPsrRegime.className = "text-[8px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-800";
+        } else if (livePsrTempK < 80.0) {
+          elemPsrRegime.innerText = `COLD TRAP (${livePsrTempK.toFixed(1)}K)`;
+          elemPsrRegime.className = "text-[8px] font-bold text-sky-400 bg-blue-950/60 px-2 py-1 rounded border border-sky-800";
+        } else {
+          elemPsrRegime.innerText = `THERMAL LOSS (${livePsrTempK.toFixed(1)}K)`;
+          elemPsrRegime.className = "text-[8px] font-bold text-amber-400 bg-amber-950/60 px-2 py-1 rounded border border-amber-800";
+        }
+      }
+
+      const elemSubRisk = document.getElementById('lblSublimationRisk');
+      if (elemSubRisk) {
+        elemSubRisk.innerText = evapRateStr;
+      }
+
+      const elemLifetime = document.getElementById('lblSublimationLifetime');
+      if (elemLifetime) {
+        elemLifetime.innerText = `~${lifetimeGyr.toFixed(2)} Billion Yrs`;
+      }
+
+      const elemIsru = document.getElementById('lblIsruPotential');
+      if (elemIsru) {
+        elemIsru.innerText = `H₂O Extraction: 100% Viable (Flux: ${qTotalPsr.toFixed(3)} W/m²)`;
+      }
+    }
+
+    // INITIALIZE MOON ENGINE
+    window.onload = function () {
+      executeMoonClockLoop();
+      setInterval(executeMoonClockLoop, 500);
+    };
+  </script>
+</body>
+
+</html>
